@@ -7,15 +7,15 @@
 
 import Foundation
 
-final class URLSessionHTTPClient: HTTPClient {
+public final class URLSessionHTTPClient: HTTPClient {
     
     private let session: URLSession
     
-    init(session: URLSession)  {
+    public init(session: URLSession)  {
         self.session = session
     }
     
-    func getJSON<T : Decodable>(from url: URL, type: T.Type) async -> Result<T, HTTP.ClientError> {
+    public func getJSON<T : Decodable>(from url: URL, type: T.Type) async -> Result<T, HTTP.ClientError> {
         do {
             let (data, urlResponse) = try await session.data(for: URLRequest(url: url))
             if let httpResposne = urlResponse as? HTTPURLResponse,
