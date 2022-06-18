@@ -14,39 +14,6 @@ import XCTest
 #endif
 
 
-protocol APICredentialsProvider {
-    
-}
-
-final class HTTPClient {
-    
-    enum ClientError: Error {
-        case cantDecode, networkError, badRequest
-    }
-    
-    private let session: URLSession
-    
-    init(session: URLSession)  {
-        self.session = session
-    }
-    
-    func getJSON<T : Decodable>(from url: URL, type: T.Type) async -> Result<T, ClientError> {
-        do {
-            let (data, urlResponse) = try await session.data(for: URLRequest(url: url))
-            if let httpResposne = urlResponse as? HTTPURLResponse,
-               httpResposne.statusCode < 200 || httpResposne.statusCode >= 300 {
-                return .failure(.badRequest)
-            }
-            let entity = try JSONDecoder().decode(type, from: data)
-            return .success(entity)
-        } catch let error as DecodingError {
-            debugPrint(error)
-            return .failure(.cantDecode)
-        } catch {
-            return .failure(.networkError)
-        }
-    }
-}
 
 
 final class HttpClientTests: XCTestCase {
@@ -80,15 +47,26 @@ final class HttpClientTests: XCTestCase {
         let result = await sut.getJSON(from: urlToCall, type: CanDecode.self)
         XCTAssertEqual(result, .failure(.badRequest))
     }
+    
+    func test_whenMakeAFailureRequest_shouldThrowANetworkError() async {
+        let sut = makeSUT()
+        let urlToCall = anyURL()
+        stubRequest(url: urlToCall, with: .init(statusCode: 400, data: .failure(Error.anyError)))
+    
+        let result = await sut.getJSON(from: urlToCall, type: CanDecode.self)
+        XCTAssertEqual(result, .failure(.networkError))
+    }
+    
 }
 
 // MARK: - Helpers
 
-extension HTTPClient.ClientError : Equatable {
+extension HTTP.ClientError : Equatable {
     static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
             case (.cantDecode, .cantDecode): return true
             case (.badRequest, .badRequest): return true
+            case (.networkError, .networkError): return true
             default: return false
         }
     }
@@ -117,7 +95,7 @@ fileprivate extension HttpClientTests {
     func makeSUT() -> HTTPClient {
         let configuration = URLSessionConfiguration.ephemeral
         startInterceptingRequests(on: configuration)
-        return HTTPClient(session: .init(configuration: configuration))
+        return URLSessionHTTPClient(session: .init(configuration: configuration))
     }
     
     func anyURL() -> URL {

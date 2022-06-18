@@ -6,3 +6,17 @@
 //
 
 import Foundation
+
+public protocol HTTPClient {
+    func getJSON<T : Decodable>(from url: URL, type: T.Type) async -> Result<T, HTTP.ClientError>
+}
+
+public enum HTTP {
+    
+}
+
+extension HTTP {
+    public enum ClientError: Error {
+        case cantDecode, networkError, badRequest
+    }
+}
