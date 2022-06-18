@@ -52,10 +52,9 @@ final class HTTPClient {
 final class HttpClientTests: XCTestCase {
     
     func test_whenMakeASuccessfullRequest_shouldDecodeObjectCorretly() async {
-        let sessionConfig: URLSessionConfiguration = .ephemeral
-        startInterceptingRequests(on: sessionConfig)
-        let sut = HTTPClient(session: .init(configuration: sessionConfig))
-        let urlToCall = URL(string: "https://google.com")!
+        let sut = makeSUT()
+
+        let urlToCall = anyURL()
         stubRequest(url: urlToCall, with: .init(statusCode: 200, data: .success(anyJson())))
         
         let result = await sut.getJSON(from: urlToCall, type: CanDecode.self)
@@ -64,10 +63,8 @@ final class HttpClientTests: XCTestCase {
     }
     
     func test_whenMakeASuccessfullRequest_andReceivedAInvalid_shouldThrowACantDecodeError() async {
-        let sessionConfig: URLSessionConfiguration = .ephemeral
-        startInterceptingRequests(on: sessionConfig)
-        let sut = HTTPClient(session: .init(configuration: sessionConfig))
-        let urlToCall = URL(string: "https://google.com")!
+        let sut = makeSUT()
+        let urlToCall = anyURL()
         stubRequest(url: urlToCall, with: .init(statusCode: 200, data: .success(anyJson())))
         
         let result = await sut.getJSON(from: urlToCall, type: CantDecode.self)
@@ -76,14 +73,11 @@ final class HttpClientTests: XCTestCase {
     }
 
     func test_whenMakeARequestWith4xxStatus_shouldThrowABadRequestError() async {
-        let sessionConfig: URLSessionConfiguration = .ephemeral
-        startInterceptingRequests(on: sessionConfig)
-        let sut = HTTPClient(session: .init(configuration: sessionConfig))
-        let urlToCall = URL(string: "https://google.com")!
+        let sut = makeSUT()
+        let urlToCall = anyURL()
         stubRequest(url: urlToCall, with: .init(statusCode: 400, data: .success(anyJson())))
-        
+    
         let result = await sut.getJSON(from: urlToCall, type: CanDecode.self)
-        
         XCTAssertEqual(result, .failure(.badRequest))
     }
 }
@@ -118,6 +112,16 @@ fileprivate extension HttpClientTests {
             {"name": "Teste"}
             """.utf8
         )
+    }
+    
+    func makeSUT() -> HTTPClient {
+        let configuration = URLSessionConfiguration.ephemeral
+        startInterceptingRequests(on: configuration)
+        return HTTPClient(session: .init(configuration: configuration))
+    }
+    
+    func anyURL() -> URL {
+        return URL(string: "https://google.com")!
     }
     
 }
