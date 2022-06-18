@@ -74,7 +74,18 @@ final class HttpClientTests: XCTestCase {
         
         XCTAssertEqual(result, .failure(.cantDecode))
     }
-    
+
+    func test_whenMakeARequestWith4xxStatus_shouldThrowABadRequestError() async {
+        let sessionConfig: URLSessionConfiguration = .ephemeral
+        startInterceptingRequests(on: sessionConfig)
+        let sut = HTTPClient(session: .init(configuration: sessionConfig))
+        let urlToCall = URL(string: "https://google.com")!
+        stubRequest(url: urlToCall, with: .init(statusCode: 400, data: .success(anyJson())))
+        
+        let result = await sut.getJSON(from: urlToCall, type: CanDecode.self)
+        
+        XCTAssertEqual(result, .failure(.badRequest))
+    }
 }
 
 // MARK: - Helpers
@@ -83,12 +94,17 @@ extension HTTPClient.ClientError : Equatable {
     static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
             case (.cantDecode, .cantDecode): return true
+            case (.badRequest, .badRequest): return true
             default: return false
         }
     }
 }
 
 fileprivate extension HttpClientTests {
+    enum Error: Swift.Error {
+        case anyError
+    }
+    
     struct CanDecode: Equatable, Decodable {
         let name: String
     }
