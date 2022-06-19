@@ -6,3 +6,8 @@
 //
 
 import Foundation
+import UIKit
+
+public final class LoadingCell: UICollectionViewCell, Reusable {
+    
+}

@@ -38,6 +38,8 @@ public class GridViewTests: XCTestCase {
     func anyGridCellViewModel() -> GridCellViewModel {
         return GridCellViewModel(
             title: "Test",
+            owner: "SomeUser",
+            date: "1",
             thumbnailImageURI: URL(string: "https://google.com.br")!
         )
     }
