@@ -19,27 +19,30 @@ extension Flickr {
     }
 }
 
+struct RemoteWrapper: Decodable {
+    let photos: RemotePhotoPage
+}
 
-struct RemotePage<T: Decodable>: Decodable {
+struct RemotePhotoPage: Decodable {
     let page: UInt
     let pages: UInt
     let perpage: UInt
     let total: UInt
-    let items: [T]
+    let photo: [RemotePhoto]
 }
 
-struct RemotoPhoto: Decodable {
+struct RemotePhoto: Decodable {
     let id: String
     let secret: String
-    let isPublic: Bool
+    let ispublic: UInt
     let title: String
 }
 
-struct Page<T> {
+struct PhotoPage {
     let page: UInt
     let totalPages: UInt
     let perPage: UInt
-    let items: [T]
+    let photos: [Photo]
 }
 
 struct Photo {
@@ -49,8 +52,42 @@ struct Photo {
     let title: String
 }
 
+extension Photo {
+    init(remote: RemotePhoto) {
+        self.init(
+            id: remote.id,
+            secret: remote.secret,
+            isPublic: remote.ispublic == 1,
+            title: remote.title
+        )
+    }
+}
+
+extension PhotoPage {
+    init(remote: RemotePhotoPage) {
+        self.init(
+            page: remote.page,
+            totalPages: remote.pages,
+            perPage: remote.perpage,
+            photos: remote.photo.map { Photo(remote: $0) }
+        )
+    }
+}
+
+
+protocol PagedPhotoMapper {
+    func map(_ data: Data) throws -> RemotePhotoPage
+}
+
+struct PagedPhotoMapperJsonDecoder : PagedPhotoMapper {
+    func map(_ data: Data) throws -> RemotePhotoPage {
+        let wrapper = try JSONDecoder().decode(RemoteWrapper.self, from: data)
+        return wrapper.photos
+    }
+}
+
 protocol FlickrService {
-    func fetchPopular(userID: String?) async -> Result<Page<Photo>, Flickr.Error>
+    func fetchPopular(userID: String?) async -> Result<PhotoPage, Flickr.Error>
 }
 
 struct FlickrServiceImpl : FlickrService {
@@ -61,7 +98,7 @@ struct FlickrServiceImpl : FlickrService {
         self.client = client
     }
     
-    func fetchPopular(userID: String? = nil) async -> Result<Page<Photo>, Flickr.Error> {
+    func fetchPopular(userID: String? = nil) async -> Result<PhotoPage, Flickr.Error> {
         guard let url = FlickrURLBuilder(method: .fetchPopularPhotos)
             .userId(userID)
             .build() else { return .failure(.invalidURI) }
@@ -84,6 +121,17 @@ final class FlickrServiceTests: XCTestCase {
         let result = await sut.fetchPopular()
         XCTAssertEqual(mockHTTPClient.getDataMessages.count, 1)
         XCTAssertEqual(mockHTTPClient.getDataMessages.first?.relativeString, anyFlickrURL())
+    }
+    
+    func test_PagedPhotoMapperShouldMakeCorrectParser() {
+        let sut = PagedPhotoMapperJsonDecoder()
+        do {
+            let result = try sut.map(anyJson())
+            XCTAssertEqual(result.photo.count, 1)
+        } catch let error {
+            XCTFail("\(error)")
+        }
+        
     }
 }
 
@@ -108,5 +156,32 @@ fileprivate extension FlickrServiceTests {
     
     func anyFlickrURL(userId: String = "139356341%40N05") -> String {
         "https://www.flickr.com/services/rest/?api_key=6ee86dfd9bce6f402e171ff247753cbd&format=json&method=flickr.photos.getPopular&user_id=\(userId)"
+    }
+    
+    func anyJson() -> Data {
+        Data("""
+        {
+          "photos": {
+            "page": 1,
+            "pages": 1,
+            "perpage": 100,
+            "total": 100,
+            "photo": [
+              {
+                "id": "51924461369",
+                "owner": "139356341@N05",
+                "secret": "db7fa363fd",
+                "server": "65535",
+                "farm": 66,
+                "title": "Southwold Pier 3",
+                "ispublic": 1,
+                "isfriend": 0,
+                "isfamily": 0
+              }
+            ]
+          },
+          "stat": "ok"
+        }
+        """.utf8)
     }
 }
