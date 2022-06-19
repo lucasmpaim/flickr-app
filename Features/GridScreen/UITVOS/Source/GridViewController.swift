@@ -32,6 +32,7 @@ public final class GridViewController: UIViewController, GridRender {
         collection.dataSource = self
         collection.register(GridCell.self)
         collection.register(LoadingCell.self)
+        collection.register(GridHeader.self)
         return collection
     }()
     
@@ -40,6 +41,8 @@ public final class GridViewController: UIViewController, GridRender {
         let width = (UIScreen.main.bounds.width / 3) - 180
         let height = width * 0.8
         flowLayout.itemSize = .init(width: width, height: height)
+        flowLayout.headerReferenceSize = CGSize(width: UIScreen.main.bounds.width, height: 80)
+        flowLayout.sectionInset = .init(top: 80, left: 0, bottom: 0, right: 0)
         return flowLayout
     }()
 

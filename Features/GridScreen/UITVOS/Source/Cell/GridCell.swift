@@ -55,8 +55,8 @@ public final class GridCell: UICollectionViewCell, Reusable {
             imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
-            title.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            title.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            title.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 15),
+            title.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: 15),
             title.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             title.heightAnchor.constraint(equalTo: contentView.heightAnchor, multiplier: 0.5)
         ])

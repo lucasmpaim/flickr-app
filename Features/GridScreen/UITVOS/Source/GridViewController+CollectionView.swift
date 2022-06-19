@@ -26,4 +26,19 @@ extension GridViewController: UICollectionViewDataSource, UICollectionViewDelega
         )
         return cell
     }
+    
+    public func collectionView(
+        _ collectionView: UICollectionView,
+        viewForSupplementaryElementOfKind kind: String,
+        at indexPath: IndexPath
+    ) -> UICollectionReusableView {
+        guard kind == UICollectionView.elementKindSectionHeader else { return .init() }
+        let cell = collectionView.dequeue(GridHeader.self, for: indexPath)
+        switch currentState {
+        case .empty(let customTitle): cell.title.text = customTitle
+        default: cell.title.text = "Tranding Now On Flickr"
+        }
+        return cell
+    }
+    
 }
