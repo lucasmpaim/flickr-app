@@ -13,6 +13,7 @@ let workspace = Workspace(name: "FlickrApp", projects: [
     "Targets/HttpClient",
     "Targets/FlickrService",
     "Targets/ImageCacher",
+    "Targets/TVOSApp",
     "Features/GridScreen"
 ])
 
