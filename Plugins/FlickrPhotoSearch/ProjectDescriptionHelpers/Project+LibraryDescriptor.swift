@@ -10,50 +10,51 @@ import ProjectDescription
 
 
 public struct LibraryDescriptor {
-    public typealias BundleFactory = (String, Platform) -> String
-    public typealias NameFactory = (String, Platform) -> String
-    public typealias TestsFactory = (String, Platform) -> String
+    public typealias BundleFactory = (String) -> String
+    public typealias NameFactory = (String) -> String
+    public typealias TestsFactory = (String) -> String
 
     let name: String
     let testName: TestsFactory
     let bundle: BundleFactory
     let dependencies: [TargetDependency]
     
+    
     public init(name: String,
                 dependencies: [TargetDependency] = []
     ) {
         self.name = name
         self.dependencies = dependencies
-        self.testName = { "\($0)\($1)Tests" }
-        self.bundle = { "br.com.paim.Flickr.\($0)\($1)" }
+        self.testName = { "\($0)Tests" }
+        self.bundle = { "br.com.paim.Flickr.\($0)" }
     }
 }
 
 
 extension Target {
     static func targets(
-        from descriptor: LibraryDescriptor,
-        platform: Platform
+        from descriptor: LibraryDescriptor
     ) -> [Target] {
-        let targetName = descriptor.name.appending("\(platform)")
         return [
             Target(
-              name: targetName,
-              platform: platform,
+              name: descriptor.name,
+              platform: .tvOS, /* override by settings, passed just for fill required argument  */
               product: .framework,
-              bundleId: descriptor.bundle(descriptor.name, platform),
-              sources: "Sources/**/*.swift"
+              bundleId: descriptor.bundle(descriptor.name),
+              sources: "Sources/**/*.swift",
+              settings: .makeSharedLibrarySettings()
             ),
             Target(
-              name: targetName.appending("Tests"),
-              platform: platform,
+              name: descriptor.name.appending("Tests"),
+              platform: .tvOS,
               product: .unitTests,
-              bundleId: descriptor.bundle(descriptor.name, platform),
+              bundleId: descriptor.bundle(descriptor.name),
               sources: "Tests/**/*.swift",
               dependencies: [
                 .xctest,
-                .target(name: targetName)
-              ]
+                .target(name: descriptor.name)
+              ],
+              settings: .makeSharedLibrarySettings()
             )
         ]
     }
@@ -64,7 +65,7 @@ public extension Project {
         return Project(
             name: descriptor.name,
             settings: .makeSharedLibrarySettings(),
-            targets: Target.targets(from: descriptor, platform: .iOS) + Target.targets(from: descriptor, platform: .tvOS)
+            targets: Target.targets(from: descriptor)
         )
     }
 }

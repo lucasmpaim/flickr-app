@@ -34,9 +34,16 @@ public extension Settings {
     }
     
     static func makeSharedLibrarySettings() -> Settings {
+        // TARGETED_DEVICE_FAMILY
+        // 1 -> iPhone
+        // 2 -> iPad
+        // 3 -> tvOS
+        // 4 -> watchOS
         let base: SettingsDictionary = [
             "EMBEDDED_CONTENT_CONTAINS_SWIFT": false,
-            "FRAMEWORK_SEARCH_PATHS": "$(inherited) $(SYMROOT)/Release$(EFFECTIVE_PLATFORM_NAME)"
+            "FRAMEWORK_SEARCH_PATHS": "$(inherited) $(SYMROOT)/Release$(EFFECTIVE_PLATFORM_NAME)",
+            "SUPPORTED_PLATFORMS": "iphoneos iphonesimulator appletvos appletvsimulator",
+            "TARGETED_DEVICE_FAMILY": "1,2,3"
         ]
         return Settings.settings(
             base: base,

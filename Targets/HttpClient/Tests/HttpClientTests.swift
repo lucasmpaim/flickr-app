@@ -7,14 +7,7 @@
 
 import XCTest
 
-#if os(iOS)
-    @testable import HttpClientiOS
-#else
-    @testable import HttpClienttvOS
-#endif
-
-
-
+@testable import HttpClient
 
 final class HttpClientTests: XCTestCase {
     
