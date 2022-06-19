@@ -7,44 +7,7 @@
 
 import Foundation
 import XCTest
-
-
-
-struct FlickrURLBuilder {
-    
-    enum SupportedMethods: String, RawRepresentable {
-        case fetchPopularPhotos = "flickr.photos.getPopular"
-    }
-    
-    private static var apiKey: String {
-        "6ee86dfd9bce6f402e171ff247753cbd"
-    }
-    
-    private static var baseURL: String {
-        "https://www.flickr.com/services/rest/?api_key=\(apiKey)&format=json"
-    }
-    
-    private static var defaultUserNSId: String { "139356341@N05" }
-    
-    private let method: SupportedMethods
-    private var userNSID: String?
-    
-    init(method: SupportedMethods) {
-        self.method = method
-    }
-    
-    mutating func userId(_ id: String) -> Self {
-        self.userNSID = id
-        return self
-    }
-    
-    func build() -> URL? {
-        let userIDString = (userNSID ?? FlickrURLBuilder.defaultUserNSId).addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? ""
-        let urlString = "\(FlickrURLBuilder.baseURL)&method=\(method.rawValue)&user_id=\(userIDString)"
-        return URL(string: urlString)
-    }
-    
-}
+import FlickrService
 
 final class FlickrURLBuilderTests: XCTestCase {
     func test_whenCreateFlickrURL_withPopularPhotosShouldReturnSameURLFromExplorer() {
@@ -53,6 +16,14 @@ final class FlickrURLBuilderTests: XCTestCase {
         
         XCTAssertNotNil(url)
         XCTAssertEqual(url?.relativeString, "https://www.flickr.com/services/rest/?api_key=6ee86dfd9bce6f402e171ff247753cbd&format=json&method=flickr.photos.getPopular&user_id=139356341%40N05")
+    }
+    
+    func test_whenCreateFlickrURLAndPassACustomUserId_ShouldCreateURLCorrectly() {
+        var sut = FlickrURLBuilder(method: .fetchPopularPhotos)
+        let url = sut.userId("someId").build()
+        
+        XCTAssertNotNil(url)
+        XCTAssertEqual(url?.relativeString, "https://www.flickr.com/services/rest/?api_key=6ee86dfd9bce6f402e171ff247753cbd&format=json&method=flickr.photos.getPopular&user_id=someId")
     }
 }
 
