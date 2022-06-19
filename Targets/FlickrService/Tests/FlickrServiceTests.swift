@@ -15,7 +15,7 @@ enum Flickr {
 
 extension Flickr {
     enum Error : Swift.Error {
-        case httpError(HTTP.ClientError), invalidURI
+        case httpError(HTTP.ClientError), invalidURI, cantDecode
     }
 }
 
@@ -93,9 +93,14 @@ protocol FlickrService {
 struct FlickrServiceImpl : FlickrService {
     
     private let client: HTTPClient
+    private let photoMapper: PagedPhotoMapper
     
-    init(client: HTTPClient) {
+    init(
+        client: HTTPClient,
+        photoMapper: PagedPhotoMapper
+    ) {
         self.client = client
+        self.photoMapper = photoMapper
     }
     
     func fetchPopular(userID: String? = nil) async -> Result<PhotoPage, Flickr.Error> {
@@ -107,9 +112,18 @@ struct FlickrServiceImpl : FlickrService {
         
         switch response {
         case .success(let data):
-            return .failure(.invalidURI)
+            return map(data: data)
         case .failure(let error):
             return .failure(.httpError(error))
+        }
+    }
+    
+    fileprivate func map(data: Data) -> Result<PhotoPage, Flickr.Error> {
+        do {
+            let result = try photoMapper.map(data)
+            return .success(PhotoPage(remote: result))
+        } catch {
+            return .failure(.cantDecode)
         }
     }
 }
@@ -117,13 +131,13 @@ struct FlickrServiceImpl : FlickrService {
 final class FlickrServiceTests: XCTestCase {
     func test_whenInvokeFetchPopularMethodShouldCallTheCorrectURL() async {
         let mockHTTPClient = HTTPClientMock(result: .failure(.networkError))
-        let sut = FlickrServiceImpl(client: mockHTTPClient)
+        let sut = FlickrServiceImpl(client: mockHTTPClient, photoMapper: PagedPhotoMapperJsonDecoder())
         let result = await sut.fetchPopular()
         XCTAssertEqual(mockHTTPClient.getDataMessages.count, 1)
         XCTAssertEqual(mockHTTPClient.getDataMessages.first?.relativeString, anyFlickrURL())
     }
     
-    func test_PagedPhotoMapperShouldMakeCorrectParser() {
+    func test_pagedPhotoMapperShouldMakeCorrectParser() {
         let sut = PagedPhotoMapperJsonDecoder()
         do {
             let result = try sut.map(anyJson())
@@ -131,8 +145,21 @@ final class FlickrServiceTests: XCTestCase {
         } catch let error {
             XCTFail("\(error)")
         }
-        
     }
+    
+    func test_whenInvokeFetchPopularMethodShouldReturnDomainObjects() async {
+        let mockHTTPClient = HTTPClientMock(result: .success(anyJson()))
+        let sut = FlickrServiceImpl(client: mockHTTPClient, photoMapper: PagedPhotoMapperJsonDecoder())
+        let result = await sut.fetchPopular()
+        
+        switch result {
+        case .success(let page):
+            XCTAssertEqual(page.photos.count, 1)
+        case .failure(let error):
+            XCTFail("Expect to receive a success message, got \(error) instead")
+        }
+    }
+    
 }
 
 
