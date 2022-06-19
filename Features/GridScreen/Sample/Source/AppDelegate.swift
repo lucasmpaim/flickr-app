@@ -6,15 +6,37 @@
 //
 
 import UIKit
+import HttpClient
+import ImageCacher
+import GridScreen
+import GridScreenUITVOS
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
+    var adapter: GridAdapter<GridCellViewModel>?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        
+        window = UIWindow()
+        self.adapter = GridAdapter<GridCellViewModel>(
+            imageLoader: SmartImageLoader(
+                remoteLoader: .init(
+                    httpClient: URLSessionHTTPClient(session: .shared)
+                ),
+                cacheLoader: .init()
+            )
+        )
+        
+        window?.rootViewController = GridViewController(
+            delegate: DemoGridDelegate(),
+            adapter: adapter!
+        )
+        window?.makeKeyAndVisible()
+        
+        adapter?.set(items: DemoItemsProvider.items)
+        
         return true
     }
 

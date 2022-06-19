@@ -24,6 +24,8 @@ struct RemotePhoto: Decodable {
     let secret: String
     let ispublic: UInt
     let title: String
+    let dateupload: String
+    let ownername: String
 }
 
 extension Photo {
@@ -32,7 +34,9 @@ extension Photo {
             id: remote.id,
             secret: remote.secret,
             isPublic: remote.ispublic == 1,
-            title: remote.title
+            title: remote.title,
+            dateUpload: Date.fromFlickrDate(string: remote.dateupload),
+            ownerName: remote.ownername
         )
     }
 }
@@ -45,5 +49,12 @@ extension PhotoPage {
             perPage: remote.perpage,
             photos: remote.photo.map { Photo(remote: $0) }
         )
+    }
+}
+
+fileprivate extension Date {
+    static func fromFlickrDate(string: String) -> Date? {
+        guard let timeSince1970 = Double(string) else { return nil }
+        return Date(timeIntervalSince1970: timeSince1970)
     }
 }

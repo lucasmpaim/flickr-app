@@ -9,9 +9,10 @@ import ImageCacher
 final class GridScreenFeatureTests: XCTestCase {
     func test_whenSetItemsReloadAction_shouldBeCalled() {
         var reloadActionCount: Int = 0
-        let sut = GridAdapter<Int>(imageLoader: ImageLoaderSpy(mock: .success(anyData())), reloadAction: {
+        let sut = GridAdapter<Int>(imageLoader: ImageLoaderSpy(mock: .success(anyData())))
+        sut.reloadAction = {
             reloadActionCount += 1
-        })
+        }
         
         sut.set(items: [1, 2, 3])
         
@@ -20,9 +21,10 @@ final class GridScreenFeatureTests: XCTestCase {
     
     func test_whenAppendItemsReloadAction_shouldBeCalled() {
         var reloadActionCount: Int = 0
-        let sut = GridAdapter<Int>(imageLoader: ImageLoaderSpy(mock: .success(anyData())), reloadAction: {
+        let sut = GridAdapter<Int>(imageLoader: ImageLoaderSpy(mock: .success(anyData())))
+        sut.reloadAction = {
             reloadActionCount += 1
-        })
+        }
         
         sut.append(items: [1, 2, 3])
         
@@ -31,9 +33,10 @@ final class GridScreenFeatureTests: XCTestCase {
     
     func test_whenAskForImage_shouldReturnACorrectDataAndNotCallReloadAction() async throws {
         var reloadActionCount: Int = 0
-        let sut = GridAdapter<Int>(imageLoader: ImageLoaderSpy(mock: .success(anyData())), reloadAction: {
+        let sut = GridAdapter<Int>(imageLoader: ImageLoaderSpy(mock: .success(anyData())))
+        sut.reloadAction = {
             reloadActionCount += 1
-        })
+        }
         
         let data = try await sut.loadImage(url: anyURL())
         XCTAssertEqual(data, anyData())
@@ -42,9 +45,10 @@ final class GridScreenFeatureTests: XCTestCase {
     
     func test_whenAskForImageWithError_shouldThrowsCorrectErrror() async throws {
         var reloadActionCount: Int = 0
-        let sut = GridAdapter<Int>(imageLoader: ImageLoaderSpy(mock: .failure(MockError.anyError)), reloadAction: {
+        let sut = GridAdapter<Int>(imageLoader: ImageLoaderSpy(mock: .failure(MockError.anyError)))
+        sut.reloadAction = {
             reloadActionCount += 1
-        })
+        }
         
         do {
             let data = try await sut.loadImage(url: anyURL())

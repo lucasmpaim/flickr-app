@@ -12,33 +12,38 @@ public final class GridAdapter<T> : GridAdaptable {
     
     public typealias Item = T
     
-    public let reloadAction: ReloadAction
+    public var reloadAction: ReloadAction
     
-    private var items: [T]
+    private var items: [T] {
+        didSet {
+            reloadAction()
+        }
+    }
     private let imageLoader: ImageLoader
     
     public init(
         items: [T] = [],
-        imageLoader: ImageLoader,
-        reloadAction: @escaping ReloadAction
+        imageLoader: ImageLoader
     ) {
         self.items = items
         self.imageLoader = imageLoader
-        self.reloadAction = reloadAction
+        self.reloadAction = {}
     }
     
     public func set(items: [T]) {
         self.items = items
-        reloadAction()
     }
     
     public func append(items: [T]) {
         self.items.append(contentsOf: items)
-        reloadAction()
     }
     
     public func itemFor(index: UInt) -> T {
         return items[Int(index)]
+    }
+    
+    public func countItems() -> Int {
+        return items.count
     }
     
     public func loadImage(url: URL) async throws -> Data {

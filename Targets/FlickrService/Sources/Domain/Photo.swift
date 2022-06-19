@@ -12,6 +12,9 @@ public struct Photo {
     public let secret: String
     public let isPublic: Bool
     public let title: String
+    public let dateUpload: Date?
+    public let ownerName: String
+
 }
 
 

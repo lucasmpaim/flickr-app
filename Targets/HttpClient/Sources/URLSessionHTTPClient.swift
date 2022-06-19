@@ -20,6 +20,8 @@ public final class URLSessionHTTPClient: HTTPClient {
             let (data, urlResponse) = try await session.data(for: URLRequest(url: url))
             if let httpResposne = urlResponse as? HTTPURLResponse,
                httpResposne.statusCode < 200 || httpResposne.statusCode >= 300 {
+                debugPrint("Bad Request On Call: \(url)")
+
                 return .failure(.badRequest)
             }
             return .success(data)

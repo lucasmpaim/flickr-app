@@ -68,9 +68,19 @@ extension Target {
                 ]
             ),
             Target(
+                name: descriptor.name.appending("UITVOSTests"),
+                platform: .tvOS,
+                product: .unitTests,
+                bundleId: descriptor.bundle(descriptor.name.appending("UITVOS")),
+                sources: "UITVOS/Tests/**/*.swift",
+                dependencies: [
+                    .target(name: descriptor.name.appending("UITVOS"))
+                ]
+            ),
+            Target(
                 name: descriptor.name.appending("Sample"),
                 platform: .tvOS,
-                product: .framework,
+                product: .app,
                 bundleId: descriptor.bundle(descriptor.name.appending("Sample")),
                 sources: "Sample/Source/**/*.swift",
                 resources: "Sample/Resource/**",

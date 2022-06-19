@@ -3,9 +3,11 @@ import Foundation
 
 public typealias ReloadAction = () -> Void
 
-public protocol GridAdaptable {
+public protocol GridAdaptable : AnyObject {
     associatedtype Item
-            
+    
+    var reloadAction: ReloadAction { get }
+    
     func set(items: [Item])
     func append(items: [Item])
     
@@ -13,4 +15,5 @@ public protocol GridAdaptable {
     
     func loadImage(url: URL) async throws -> Data
     
+    func countItems() -> Int
 }

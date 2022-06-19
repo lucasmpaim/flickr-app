@@ -76,7 +76,7 @@ fileprivate extension FlickrServiceTests {
     }
     
     func anyFlickrURL(userId: String = "139356341%40N05") -> String {
-        "https://www.flickr.com/services/rest/?api_key=6ee86dfd9bce6f402e171ff247753cbd&format=json&method=flickr.photos.getPopular&user_id=\(userId)"
+        "https://www.flickr.com/services/rest/?api_key=6ee86dfd9bce6f402e171ff247753cbd&format=json&extras=owner_name,dateupload&method=flickr.photos.getPopular&user_id=\(userId)"
     }
     
     func anyJson() -> Data {
@@ -97,7 +97,9 @@ fileprivate extension FlickrServiceTests {
                 "title": "Southwold Pier 3",
                 "ispublic": 1,
                 "isfriend": 0,
-                "isfamily": 0
+                "isfamily": 0,
+                "dateupload": "1655675444",
+                "ownername": "D. C. Peters"
               }
             ]
           },
@@ -124,7 +126,9 @@ fileprivate extension FlickrServiceTests {
                 "title": "Southwold Pier 3",
                 "ispublic": false,
                 "isfriend": 0,
-                "isfamily": 0
+                "isfamily": 0,
+                "dateupload": "1655675444",
+                "ownername": "D. C. Peters"
               }
             ]
           },
