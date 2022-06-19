@@ -7,7 +7,7 @@
 
 import Foundation
 import XCTest
-import FlickrService
+@testable import FlickrService
 
 final class FlickrURLBuilderTests: XCTestCase {
     func test_whenCreateFlickrURL_withPopularPhotosShouldReturnSameURLFromExplorer() {

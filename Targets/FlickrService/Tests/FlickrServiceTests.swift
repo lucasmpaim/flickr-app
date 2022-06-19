@@ -9,125 +9,6 @@ import XCTest
 import HttpClient
 @testable import FlickrService
 
-enum Flickr {
-    
-}
-
-extension Flickr {
-    enum Error : Swift.Error {
-        case httpError(HTTP.ClientError), invalidURI, cantDecode
-    }
-}
-
-struct RemoteWrapper: Decodable {
-    let photos: RemotePhotoPage
-}
-
-struct RemotePhotoPage: Decodable {
-    let page: UInt
-    let pages: UInt
-    let perpage: UInt
-    let total: UInt
-    let photo: [RemotePhoto]
-}
-
-struct RemotePhoto: Decodable {
-    let id: String
-    let secret: String
-    let ispublic: UInt
-    let title: String
-}
-
-struct PhotoPage {
-    let page: UInt
-    let totalPages: UInt
-    let perPage: UInt
-    let photos: [Photo]
-}
-
-struct Photo {
-    let id: String
-    let secret: String
-    let isPublic: Bool
-    let title: String
-}
-
-extension Photo {
-    init(remote: RemotePhoto) {
-        self.init(
-            id: remote.id,
-            secret: remote.secret,
-            isPublic: remote.ispublic == 1,
-            title: remote.title
-        )
-    }
-}
-
-extension PhotoPage {
-    init(remote: RemotePhotoPage) {
-        self.init(
-            page: remote.page,
-            totalPages: remote.pages,
-            perPage: remote.perpage,
-            photos: remote.photo.map { Photo(remote: $0) }
-        )
-    }
-}
-
-
-protocol PagedPhotoMapper {
-    func map(_ data: Data) throws -> RemotePhotoPage
-}
-
-struct PagedPhotoMapperJsonDecoder : PagedPhotoMapper {
-    func map(_ data: Data) throws -> RemotePhotoPage {
-        let wrapper = try JSONDecoder().decode(RemoteWrapper.self, from: data)
-        return wrapper.photos
-    }
-}
-
-protocol FlickrService {
-    func fetchPopular(userID: String?) async -> Result<PhotoPage, Flickr.Error>
-}
-
-struct FlickrServiceImpl : FlickrService {
-    
-    private let client: HTTPClient
-    private let photoMapper: PagedPhotoMapper
-    
-    init(
-        client: HTTPClient,
-        photoMapper: PagedPhotoMapper
-    ) {
-        self.client = client
-        self.photoMapper = photoMapper
-    }
-    
-    func fetchPopular(userID: String? = nil) async -> Result<PhotoPage, Flickr.Error> {
-        guard let url = FlickrURLBuilder(method: .fetchPopularPhotos)
-            .userId(userID)
-            .build() else { return .failure(.invalidURI) }
-        
-        let response = await client.getData(from: url)
-        
-        switch response {
-        case .success(let data):
-            return map(data: data)
-        case .failure(let error):
-            return .failure(.httpError(error))
-        }
-    }
-    
-    fileprivate func map(data: Data) -> Result<PhotoPage, Flickr.Error> {
-        do {
-            let result = try photoMapper.map(data)
-            return .success(PhotoPage(remote: result))
-        } catch {
-            return .failure(.cantDecode)
-        }
-    }
-}
-
 final class FlickrServiceTests: XCTestCase {
     func test_whenInvokeFetchPopularMethodShouldCallTheCorrectURL() async {
         let mockHTTPClient = HTTPClientMock(result: .failure(.networkError))
@@ -141,7 +22,7 @@ final class FlickrServiceTests: XCTestCase {
         let sut = PagedPhotoMapperJsonDecoder()
         do {
             let result = try sut.map(anyJson())
-            XCTAssertEqual(result.photo.count, 1)
+            XCTAssertEqual(result.photos.count, 1)
         } catch let error {
             XCTFail("\(error)")
         }
@@ -255,7 +136,7 @@ fileprivate extension FlickrServiceTests {
 
 
 extension Flickr.Error: Equatable {
-    static func == (lhs: Self, rhs: Self) -> Bool {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
         case (.cantDecode, .cantDecode): return true
         default: return false
