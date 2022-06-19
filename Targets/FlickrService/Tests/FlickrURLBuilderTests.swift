@@ -15,7 +15,7 @@ final class FlickrURLBuilderTests: XCTestCase {
         let url = sut.build()
         
         XCTAssertNotNil(url)
-        XCTAssertEqual(url?.relativeString, "https://www.flickr.com/services/rest/?api_key=6ee86dfd9bce6f402e171ff247753cbd&format=json&method=flickr.photos.getPopular&user_id=139356341%40N05")
+        XCTAssertEqual(url?.relativeString, anyFlickrURL())
     }
     
     func test_whenCreateFlickrURLAndPassACustomUserId_ShouldCreateURLCorrectly() {
@@ -23,8 +23,13 @@ final class FlickrURLBuilderTests: XCTestCase {
         let url = sut.userId("someId").build()
         
         XCTAssertNotNil(url)
-        XCTAssertEqual(url?.relativeString, "https://www.flickr.com/services/rest/?api_key=6ee86dfd9bce6f402e171ff247753cbd&format=json&method=flickr.photos.getPopular&user_id=someId")
+        XCTAssertEqual(url?.relativeString, anyFlickrURL(userId: "someId"))
     }
 }
 
+fileprivate extension FlickrURLBuilderTests {
+    func anyFlickrURL(userId: String = "139356341%40N05") -> String {
+        "https://www.flickr.com/services/rest/?api_key=6ee86dfd9bce6f402e171ff247753cbd&format=json&method=flickr.photos.getPopular&user_id=\(userId)"
+    }
+}
 

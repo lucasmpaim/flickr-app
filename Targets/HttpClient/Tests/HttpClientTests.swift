@@ -17,19 +17,9 @@ final class HttpClientTests: XCTestCase {
         let urlToCall = anyURL()
         stubRequest(url: urlToCall, with: .init(statusCode: 200, data: .success(anyJson())))
         
-        let result = await sut.getJSON(from: urlToCall, type: CanDecode.self)
+        let result = await sut.getData(from: urlToCall)
         
-        XCTAssertEqual(result, .success(.init(name: "Teste")))
-    }
-    
-    func test_whenMakeASuccessfullRequest_andReceivedAInvalid_shouldThrowACantDecodeError() async {
-        let sut = makeSUT()
-        let urlToCall = anyURL()
-        stubRequest(url: urlToCall, with: .init(statusCode: 200, data: .success(anyJson())))
-        
-        let result = await sut.getJSON(from: urlToCall, type: CantDecode.self)
-        
-        XCTAssertEqual(result, .failure(.cantDecode))
+        XCTAssertEqual(result, .success(anyJson()))
     }
 
     func test_whenMakeARequestWith4xxStatus_shouldThrowABadRequestError() async {
@@ -37,7 +27,7 @@ final class HttpClientTests: XCTestCase {
         let urlToCall = anyURL()
         stubRequest(url: urlToCall, with: .init(statusCode: 400, data: .success(anyJson())))
     
-        let result = await sut.getJSON(from: urlToCall, type: CanDecode.self)
+        let result = await sut.getData(from: urlToCall)
         XCTAssertEqual(result, .failure(.badRequest))
     }
     
@@ -46,7 +36,7 @@ final class HttpClientTests: XCTestCase {
         let urlToCall = anyURL()
         stubRequest(url: urlToCall, with: .init(statusCode: 400, data: .failure(Error.anyError)))
     
-        let result = await sut.getJSON(from: urlToCall, type: CanDecode.self)
+        let result = await sut.getData(from: urlToCall)
         XCTAssertEqual(result, .failure(.networkError))
     }
     
@@ -57,7 +47,6 @@ final class HttpClientTests: XCTestCase {
 extension HTTP.ClientError : Equatable {
     static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
-            case (.cantDecode, .cantDecode): return true
             case (.badRequest, .badRequest): return true
             case (.networkError, .networkError): return true
             default: return false
@@ -68,13 +57,6 @@ extension HTTP.ClientError : Equatable {
 fileprivate extension HttpClientTests {
     enum Error: Swift.Error {
         case anyError
-    }
-    
-    struct CanDecode: Equatable, Decodable {
-        let name: String
-    }
-    struct CantDecode: Equatable, Decodable {
-        let uName: String
     }
     
     func anyJson() -> Data {

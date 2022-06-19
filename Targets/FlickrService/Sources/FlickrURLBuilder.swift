@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct FlickrURLBuilder {
+final class FlickrURLBuilder {
     
     enum SupportedMethods: String, RawRepresentable {
         case fetchPopularPhotos = "flickr.photos.getPopular"
@@ -30,7 +30,7 @@ struct FlickrURLBuilder {
         self.method = method
     }
     
-    mutating func userId(_ id: String) -> Self {
+    func userId(_ id: String?) -> Self {
         self.userNSID = id
         return self
     }
