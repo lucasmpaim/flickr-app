@@ -92,7 +92,9 @@ struct SmartImageLoader : ImageLoader {
         if cacheLoader.fileExists(from: url) {
             return try await cacheLoader.load(from: url)
         }
-        fatalError()
+        let data = try await remoteLoader.load(from: url)
+        await cacheLoader.save(data: data, from: url)
+        return data
     }
     
 }
@@ -166,6 +168,23 @@ final class ImageCacheTests: XCTestCase {
         
         XCTAssertEqual(data, anyData())
         XCTAssertEqual(mockHTTPClient.getDataMessages.count, .zero)
+    }
+    
+    func test_whenSmartLoaderFetchImageFromNetwork_shouldSaveOnCacheAndReturnData() async {
+        let cacheLoader = CacheImageLoader()
+        let path = cacheLoader.filePathFor(url: anyURL())
+        addTeardownBlock { try? FileManager.default.removeItem(atPath: path) }
+        let mockHTTPClient = MockHTTPClient(stub: .success(anyData()))
+        let sut = SmartImageLoader(
+            remoteLoader: .init(httpClient: mockHTTPClient),
+            cacheLoader: cacheLoader
+        )
+        
+        let data = try? await sut.load(from: anyURL())
+        
+        XCTAssertEqual(data, anyData())
+        XCTAssertEqual(mockHTTPClient.getDataMessages.count, 1)
+        XCTAssertTrue(cacheLoader.fileExists(from: anyURL()))
     }
 }
 
