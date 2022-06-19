@@ -9,6 +9,7 @@ import Foundation
 
 public protocol HTTPClient {
     func getJSON<T : Decodable>(from url: URL, type: T.Type) async -> Result<T, HTTP.ClientError>
+    func getData(from url: URL) async -> Result<Data, HTTP.ClientError>
 }
 
 public enum HTTP {
