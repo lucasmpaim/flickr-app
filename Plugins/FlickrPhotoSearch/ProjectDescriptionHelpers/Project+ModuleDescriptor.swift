@@ -1,15 +1,16 @@
 //
-//  ModuleDescriptor.swift
-//  MyPlugin
+//  Project+ModuleDescriptor.swift
+//  FlikrPhotoPlugin
 //
-//  Created by Lucas Paim on 18/06/22.
+//  Created by Lucas Paim on 19/06/22.
 //
 
 import Foundation
 import ProjectDescription
 
 
-public struct LibraryDescriptor {
+public struct ModuleDescriptor {
+
     public typealias BundleFactory = (String) -> String
     public typealias TestsFactory = (String) -> String
 
@@ -32,15 +33,15 @@ public struct LibraryDescriptor {
 
 extension Target {
     static func targets(
-        from descriptor: LibraryDescriptor
+        from descriptor: ModuleDescriptor
     ) -> [Target] {
         return [
             Target(
-              name: descriptor.name,
-              platform: .tvOS, /* override by settings, passed just for fill required argument  */
+                name: descriptor.name,
+              platform: .tvOS,
               product: .framework,
               bundleId: descriptor.bundle(descriptor.name),
-              sources: "Sources/**/*.swift",
+              sources: "Feature/Source/**/*.swift",
               dependencies: descriptor.dependencies,
               settings: .makeSharedLibrarySettings()
             ),
@@ -49,22 +50,44 @@ extension Target {
               platform: .tvOS,
               product: .unitTests,
               bundleId: descriptor.bundle(descriptor.name),
-              sources: "Tests/**/*.swift",
+              sources: "Feature/Tests/**/*.swift",
               dependencies: [
                 .xctest,
                 .target(name: descriptor.name)
               ],
               settings: .makeSharedLibrarySettings()
-            )
+            ),
+            Target(
+                name: descriptor.name.appending("UITVOS"),
+                platform: .tvOS,
+                product: .framework,
+                bundleId: descriptor.bundle(descriptor.name.appending("UITVOS")),
+                sources: "UITVOS/Source/**/*.swift",
+                dependencies: [
+                    .target(name: descriptor.name)
+                ]
+            ),
+            Target(
+                name: descriptor.name.appending("Sample"),
+                platform: .tvOS,
+                product: .framework,
+                bundleId: descriptor.bundle(descriptor.name.appending("Sample")),
+                sources: "Sample/Source/**/*.swift",
+                resources: "Sample/Resource/**",
+                dependencies: [
+                    .target(name: descriptor.name),
+                    .target(name: descriptor.name.appending("UITVOS"))
+                ]
+            ),
         ]
     }
 }
 
 public extension Project {
-    static func sharedLibrary(from descriptor: LibraryDescriptor) -> Self {
+    static func appModule(from descriptor: ModuleDescriptor) -> Self {
         return Project(
             name: descriptor.name,
-            settings: .makeSharedLibrarySettings(),
+            settings: .makeModuleSettings(),
             targets: Target.targets(from: descriptor)
         )
     }

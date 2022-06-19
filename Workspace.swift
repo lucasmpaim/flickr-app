@@ -12,6 +12,7 @@ import ProjectDescriptionHelpers
 let workspace = Workspace(name: "FlickrApp", projects: [
     "Targets/HttpClient",
     "Targets/FlickrService",
-    "Targets/ImageCacher"
+    "Targets/ImageCacher",
+    "Features/GridScreen"
 ])
 

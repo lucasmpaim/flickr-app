@@ -51,4 +51,15 @@ public extension Settings {
         )
     }
     
+    static func makeModuleSettings() -> Settings {
+        let base: SettingsDictionary = [
+            "EMBEDDED_CONTENT_CONTAINS_SWIFT": false,
+            "FRAMEWORK_SEARCH_PATHS": "$(inherited) $(SYMROOT)/Release$(EFFECTIVE_PLATFORM_NAME)"
+        ]
+        return Settings.settings(
+            base: base,
+            configurations: Configuration.allSupportedConfigurations
+        )
+    }
+    
 }
