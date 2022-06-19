@@ -23,8 +23,21 @@ protocol ImageSaver {
 }
 
 struct RemoteImageLoader : ImageLoader {
+    
+    private let httpClient: HTTPClient
+    
+    init(httpClient: HTTPClient) {
+        self.httpClient = httpClient
+    }
+    
     func load(from url: URL) async throws -> Data {
-        fatalError()
+        let data = await httpClient.getData(from: url)
+        switch data {
+        case .success(let data):
+            return data
+        case .failure(let error):
+            throw ImageLoaderError.httpError(error)
+        }
     }
 }
 
@@ -108,12 +121,47 @@ final class ImageCacheTests: XCTestCase {
             XCTFail("Expect to receive data, got \(error) instead")
         }
     }
+    
+    func test_loadRemoteImage_shouldReturnData() async {
+        let httpClient = MockHTTPClient(stub: .success(anyData()))
+        let sut = RemoteImageLoader(httpClient: httpClient)
+        let data = try? await sut.load(from: anyURL())
+        XCTAssertEqual(data, anyData())
+    }
+    
+    func test_whenFailureToFetchRemoteImage_shouldThrowAnError() async {
+        let httpClient = MockHTTPClient(stub: .failure(.networkError))
+        let sut = RemoteImageLoader(httpClient: httpClient)
+        do {
+            let data = try await sut.load(from: anyURL())
+            XCTFail("Expect to receive an error, got \(data) instead")
+        } catch let error as ImageLoaderError {
+            XCTAssertEqual(error, .httpError(.networkError))
+        } catch let error {
+            XCTFail("Expect to receive an ImageLoaderError error, got \(error) instead")
+        }
+    }
 }
 
 // MARK: - Helpers
 fileprivate extension ImageCacheTests {
     func anyURL() -> URL { URL(string: "https://google.com.br")! }
     func anyData() -> Data { Data("some data".utf8) }
+    
+    
+    class MockHTTPClient: HTTPClient {
+        let stub: Result<Data, HTTP.ClientError>
+        
+        init(stub: Result<Data, HTTP.ClientError>) {
+            self.stub = stub
+        }
+        
+        private(set) var getDataMessages: [URL] = []
+        func getData(from url: URL) async -> Result<Data, HTTP.ClientError> {
+            getDataMessages.append(url)
+            return stub
+        }
+    }
 }
 
 
@@ -121,6 +169,7 @@ extension ImageLoaderError: Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
         case (.notFound, .notFound): return true
+        case (.httpError(.networkError), .httpError(.networkError)): return true
         default: return false
         }
     }
