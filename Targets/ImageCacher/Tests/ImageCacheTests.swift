@@ -20,6 +20,7 @@ protocol ImageLoader {
 
 protocol ImageSaver {
     func save(data: Data, from url: URL) async
+    func fileExists(from url: URL) -> Bool
 }
 
 struct RemoteImageLoader : ImageLoader {
@@ -57,6 +58,11 @@ struct CacheImageLoader : ImageLoader, ImageSaver {
         return path.path
     }
     
+    func fileExists(from url: URL) -> Bool {
+        let path = filePathFor(url: url)
+        return fileManager.fileExists(atPath: path)
+    }
+    
     func load(from url: URL) async throws -> Data {
         let path = filePathFor(url: url)
         guard fileManager.fileExists(atPath: path),
@@ -74,15 +80,18 @@ struct CacheImageLoader : ImageLoader, ImageSaver {
 
 struct SmartImageLoader : ImageLoader {
     
-    let remoteLoader: RemoteImageLoader
-    let cacheLoader: CacheImageLoader
+    private let remoteLoader: RemoteImageLoader
+    private let cacheLoader: CacheImageLoader
     
     init(remoteLoader: RemoteImageLoader, cacheLoader: CacheImageLoader) {
         self.remoteLoader = remoteLoader
         self.cacheLoader = cacheLoader
     }
     
-    func load(from: URL) async throws -> Data {
+    func load(from url: URL) async throws -> Data {
+        if cacheLoader.fileExists(from: url) {
+            return try await cacheLoader.load(from: url)
+        }
         fatalError()
     }
     
@@ -140,6 +149,23 @@ final class ImageCacheTests: XCTestCase {
         } catch let error {
             XCTFail("Expect to receive an ImageLoaderError error, got \(error) instead")
         }
+    }
+    
+    func test_whenCacheImageExistsSmartLoader_shouldNotCallRemoteLoader() async {
+        let cacheLoader = CacheImageLoader()
+        let path = cacheLoader.filePathFor(url: anyURL())
+        addTeardownBlock { try? FileManager.default.removeItem(atPath: path) }
+        await cacheLoader.save(data: anyData(), from: anyURL())
+        let mockHTTPClient = MockHTTPClient(stub: .failure(.networkError))
+        let sut = SmartImageLoader(
+            remoteLoader: .init(httpClient: mockHTTPClient),
+            cacheLoader: cacheLoader
+        )
+        
+        let data = try? await sut.load(from: anyURL())
+        
+        XCTAssertEqual(data, anyData())
+        XCTAssertEqual(mockHTTPClient.getDataMessages.count, .zero)
     }
 }
 
