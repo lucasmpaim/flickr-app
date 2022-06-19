@@ -147,7 +147,7 @@ final class FlickrServiceTests: XCTestCase {
         }
     }
     
-    func test_whenInvokeFetchPopularMethodShouldReturnDomainObjects() async {
+    func test_whenInvokeFetchPopularMethod_shouldReturnDomainObjects() async {
         let mockHTTPClient = HTTPClientMock(result: .success(anyJson()))
         let sut = FlickrServiceImpl(client: mockHTTPClient, photoMapper: PagedPhotoMapperJsonDecoder())
         let result = await sut.fetchPopular()
@@ -157,6 +157,19 @@ final class FlickrServiceTests: XCTestCase {
             XCTAssertEqual(page.photos.count, 1)
         case .failure(let error):
             XCTFail("Expect to receive a success message, got \(error) instead")
+        }
+    }
+    
+    func test_whenInvokeFetchPopularMethod_withInvalidJson_shouldFailWithCorrectError() async {
+        let mockHTTPClient = HTTPClientMock(result: .success(anyInvalidJson()))
+        let sut = FlickrServiceImpl(client: mockHTTPClient, photoMapper: PagedPhotoMapperJsonDecoder())
+        let result = await sut.fetchPopular()
+        
+        switch result {
+        case .success(let page):
+            XCTFail("Expect to receive a failure message, got \(page) instead")
+        case .failure(let error):
+            XCTAssertEqual(error, .cantDecode)
         }
     }
     
@@ -210,5 +223,42 @@ fileprivate extension FlickrServiceTests {
           "stat": "ok"
         }
         """.utf8)
+    }
+    
+    func anyInvalidJson() -> Data {
+        Data("""
+        {
+          "photos": {
+            "page": 1,
+            "pages": 1,
+            "perpage": 100,
+            "total": 100,
+            "photo": [
+              {
+                "id": "51924461369",
+                "owner": "139356341@N05",
+                "secret": "db7fa363fd",
+                "server": "65535",
+                "farm": 66,
+                "title": "Southwold Pier 3",
+                "ispublic": false,
+                "isfriend": 0,
+                "isfamily": 0
+              }
+            ]
+          },
+          "stat": "ok"
+        }
+        """.utf8)
+    }
+}
+
+
+extension Flickr.Error: Equatable {
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        switch (lhs, rhs) {
+        case (.cantDecode, .cantDecode): return true
+        default: return false
+        }
     }
 }
