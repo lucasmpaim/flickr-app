@@ -42,6 +42,7 @@ extension Target {
               product: .framework,
               bundleId: descriptor.bundle(descriptor.name),
               sources: "Sources/**/*.swift",
+              dependencies: descriptor.dependencies,
               settings: .makeSharedLibrarySettings()
             ),
             Target(

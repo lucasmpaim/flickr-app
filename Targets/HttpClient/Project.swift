@@ -3,4 +3,8 @@ import ProjectDescriptionHelpers
 import FlikrPhotoPlugin
 
 
-let project = Project.sharedLibrary(from: .init(name: "HttpClient"))
+let project = Project.sharedLibrary(
+    from: .init(
+        name: "HttpClient"
+    )
+)
