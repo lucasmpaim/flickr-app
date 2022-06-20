@@ -44,6 +44,13 @@ final class FlickrTradingTopRoute {
     }
 }
 
+extension GridViewController: SearchUpdatable where VM == FlickrTrandingTopGridViewModel {
+    func setSearch(string: String) {
+        viewModel.search(string)
+    }
+}
+
+
 fileprivate final class GridViewControllerDelegate: GridDelegate {
     func select(itemOn index: Int) { }
 }

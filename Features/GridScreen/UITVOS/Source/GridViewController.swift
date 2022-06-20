@@ -17,7 +17,7 @@ public protocol GridDelegate: AnyObject {
 
 
 public final class GridViewController<VM: GridViewControllerViewModel>:
-    UIViewController, GridRender, UICollectionViewDataSource, UICollectionViewDelegate {
+    UIViewController, GridRender, UICollectionViewDataSource, UICollectionViewDelegate, UIScrollViewDelegate {
     
     required init?(coder: NSCoder) {
         fatalError("Not implemented")
@@ -27,7 +27,7 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
     
     var adapter: VM.GridAdaptable { viewModel.adapter }
         
-    private var viewModel: VM
+    public var viewModel: VM
         
     private lazy var collectionView: UICollectionView = {
         let collection = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
@@ -132,6 +132,12 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
         return cell
     }
     
+    
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView.contentOffset.y >= scrollView.contentSize.height * 0.7 {
+            viewModel.nextPage()
+        }
+    }
 }
 
 

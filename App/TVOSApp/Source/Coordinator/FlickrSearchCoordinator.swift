@@ -7,22 +7,43 @@
 
 import Foundation
 import UIKit
+import GridScreenUITVOS
 
-final class FlickrSearchCoordinator {
+final class FlickrSearchCoordinator: NSObject {
+    
+    private var debouncer = Debouncer(timeInterval: 3)
     
     func rootViewController() -> UIViewController {
         let tabController = UITabBarController()
-        let searchController = UISearchContainerViewController(
-            searchController: UISearchController()
+        let searchController = UISearchController()
+        searchController.searchResultsUpdater = self
+        let searchContainerController = UISearchContainerViewController(
+            searchController: searchController
         )
-        searchController.title = "Search"
+        searchContainerController.title = "Search"
+        
         tabController.viewControllers = [
             FlickrTradingTopRoute.makeViewController(),
-            searchController
+            searchContainerController
         ]
         return tabController
     }
     
-//    func enterOnSearch() -> UIViewController { }
-    
 }
+
+extension FlickrSearchCoordinator: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        debouncer.handler = { [weak searchController] in
+            (((UIApplication.shared.delegate as? AppDelegate)?
+                .window?.rootViewController as? UITabBarController)?
+                .viewControllers?.first as? SearchUpdatable)?.setSearch(string: searchController?.searchBar.text ?? "")
+        }
+        debouncer.renewInterval()
+    }
+}
+
+
+protocol SearchUpdatable {
+    func setSearch(string: String)
+}
+

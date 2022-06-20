@@ -58,7 +58,7 @@ final class FlickrURLBuilder {
         switch method {
         case .fetchPopularPhotos: break
         case .search(let search):
-            urlString.append(contentsOf: "&search=\(encodeString(search))")
+            urlString.append(contentsOf: "&text=\(encodeString(search))")
             break
         }
         

@@ -39,7 +39,7 @@ final class FlickrTrandingTopGridViewModel: GridViewControllerViewModel {
     var hasNextPage: Bool = true
     var currentPage: UInt = 1
     
-    private var currentMode: ApiMode = .popular {
+    var currentMode: ApiMode = .popular {
         didSet {
             if currentMode != oldValue {
                 cleanFeed()
@@ -72,13 +72,21 @@ final class FlickrTrandingTopGridViewModel: GridViewControllerViewModel {
     }
     
     func nextPage() {
-        guard hasNextPage else { return }
+        guard hasNextPage, currentState != .loading else { return }
         currentPage += 1
         makeRequest()
     }
     
     func retry() {
         makeRequest()
+    }
+    
+    func search(_ string: String) {
+        if string.isEmpty && currentMode != .popular {
+            currentMode = .popular
+            return
+        }
+        currentMode = .search(string)
     }
     
     private func makeRequest() {
@@ -101,7 +109,7 @@ final class FlickrTrandingTopGridViewModel: GridViewControllerViewModel {
     
     @MainActor
     func displayItems(items: [GridCellViewModel]) {
-        adapter.set(items: items)
+        adapter.append(items: items)
     }
     
     func cleanFeed() {
@@ -127,16 +135,15 @@ fileprivate extension FlickrTrandingTopGridViewModel {
     func fetchPopular(page: UInt = 1) {
         guard currentState != .loading else { return }
         currentState = .loading
+        self.feedTitle = Constants.feedTitle
         fetchPagedGridUseCase.execute(page: page) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success((let hasNextPage, let photos)):
-                self.feedTitle = Constants.feedTitle
                 self.currentState = page == 1 && photos.isEmpty ? .empty : .idle
                 self.hasNextPage = hasNextPage
                 self.displayItems(items: photos.map { $0.toGridCellViewModel() })
             case .failure(let error):
-                self.feedTitle = Constants.feedTitle
                 self.currentState = .error
                 debugPrint(error)
             }
