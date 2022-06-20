@@ -17,7 +17,8 @@ let project = Project(
                 .project(target: "HttpClient", path: .relativeToRoot("Targets/HttpClient")),
                 .project(target: "ImageCacher", path: .relativeToRoot("Targets/ImageCacher")),
                 .project(target: "FlickrService", path: .relativeToRoot("Targets/FlickrService")),
-                .project(target: "GridScreen", path: .relativeToRoot("Features/GridScreen"))
+                .project(target: "GridScreen", path: .relativeToRoot("Features/GridScreen")),
+                .project(target: "GridScreenUITVOS", path: .relativeToRoot("Features/GridScreen"))
             ]
         ),
         Target(

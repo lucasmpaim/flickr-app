@@ -16,15 +16,20 @@ public protocol GridDelegate: AnyObject {
 }
 
 
-public final class GridViewController: UIViewController, GridRender {
+public final class GridViewController<VM: GridViewControllerViewModel>:
+    UIViewController, GridRender, UICollectionViewDataSource, UICollectionViewDelegate {
+    
     required init?(coder: NSCoder) {
         fatalError("Not implemented")
     }
     
     public weak var delegate: GridDelegate?
     
-    var adapter: GridAdapter<GridCellViewModel>
-    var currentState: GridState = .loading
+    var adapter: VM.GridAdaptable { viewModel.adapter }
+        
+    private var viewModel: VM
+    
+    private let screenTitle: String
     
     private lazy var collectionView: UICollectionView = {
         let collection = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
@@ -48,22 +53,34 @@ public final class GridViewController: UIViewController, GridRender {
 
     public init(
         delegate: GridDelegate,
-        adapter: GridAdapter<GridCellViewModel>
+        viewModel: VM,
+        screenTitle: String
     ) {
         self.delegate = delegate
-        self.adapter = adapter
+        self.viewModel = viewModel
+        self.screenTitle = screenTitle
+        
         super.init(nibName: nil, bundle: nil)
         
-        self.adapter.reloadAction = {[weak self] in
+        self.adapter.reloadAction = { [weak self] in
             self?.collectionView.reloadData()
+        }
+        
+        self.viewModel.observeState = { [weak self] state in
+            self?.render(state: state)
         }
         
         setupViews()
         setupConstraints()
     }
     
+    public override func viewDidLoad() {
+        super.viewDidLoad()
+        viewModel.startFetchingData()
+    }
+    
     public func render(state: GridState) {
-        self.currentState = state
+
     }
     
     func setupViews() {
@@ -79,6 +96,38 @@ public final class GridViewController: UIViewController, GridRender {
             collectionView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor),
         ])
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return adapter.countItems()
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeue(GridCell.self, for: indexPath)
+        cell.populate(
+            adapter.itemFor(index: UInt(indexPath.row)),
+            downloadTaskProvider: {
+                url in Task<Data, Error> { [weak self] in
+                    guard let self = self else { throw GeneralError.selfDetached }
+                    return try await self.viewModel.loadImage(url: url)
+                }
+            }
+        )
+        return cell
+    }
+    
+    public func collectionView(
+        _ collectionView: UICollectionView,
+        viewForSupplementaryElementOfKind kind: String,
+        at indexPath: IndexPath
+    ) -> UICollectionReusableView {
+        guard kind == UICollectionView.elementKindSectionHeader else { return .init() }
+        let cell = collectionView.dequeue(GridHeader.self, for: indexPath)
+        switch viewModel.currentState {
+        case .empty(let customTitle): cell.title.text = customTitle
+        default: cell.title.text = screenTitle
+        }
+        return cell
     }
     
 }

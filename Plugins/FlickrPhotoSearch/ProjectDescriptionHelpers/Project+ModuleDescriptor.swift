@@ -63,6 +63,7 @@ extension Target {
                 product: .framework,
                 bundleId: descriptor.bundle(descriptor.name.appending("UITVOS")),
                 sources: "UITVOS/Source/**/*.swift",
+                resources: "UITVOS/Resources/**/*",
                 dependencies: [
                     .target(name: descriptor.name)
                 ]

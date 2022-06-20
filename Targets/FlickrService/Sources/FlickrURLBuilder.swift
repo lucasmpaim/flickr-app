@@ -18,7 +18,7 @@ final class FlickrURLBuilder {
     }
     
     private static var baseURL: String {
-        "https://www.flickr.com/services/rest/?api_key=\(apiKey)&format=json&extras=owner_name,dateupload"
+        "https://www.flickr.com/services/rest/?api_key=\(apiKey)&format=json&extras=owner_name,date_upload&nojsoncallback=1"
     }
     
     private static var defaultUserNSId: String { "139356341@N05" }

@@ -7,8 +7,10 @@
 
 import Foundation
 
-struct PagedPhotoMapperJsonDecoder : PagedPhotoMapper {
-    func map(_ data: Data) throws -> PhotoPage {
+public struct PagedPhotoMapperJsonDecoder : PagedPhotoMapper {
+    public init() { }
+    
+    public func map(_ data: Data) throws -> PhotoPage {
         let wrapper = try JSONDecoder().decode(RemoteWrapper.self, from: data)
         return PhotoPage(remote: wrapper.photos)
     }

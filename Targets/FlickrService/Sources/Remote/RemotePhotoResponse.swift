@@ -26,6 +26,7 @@ struct RemotePhoto: Decodable {
     let title: String
     let dateupload: String
     let ownername: String
+    let server: String
 }
 
 extension Photo {
@@ -36,7 +37,8 @@ extension Photo {
             isPublic: remote.ispublic == 1,
             title: remote.title,
             dateUpload: Date.fromFlickrDate(string: remote.dateupload),
-            ownerName: remote.ownername
+            ownerName: remote.ownername,
+            server: remote.server
         )
     }
 }

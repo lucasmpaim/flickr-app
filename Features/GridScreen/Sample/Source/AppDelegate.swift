@@ -15,12 +15,11 @@ import GridScreenUITVOS
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-    var adapter: GridAdapter<GridCellViewModel>?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         window = UIWindow()
-        self.adapter = GridAdapter<GridCellViewModel>(
+        let adapter = GridAdapter<GridCellViewModel>(
             imageLoader: SmartImageLoader(
                 remoteLoader: .init(
                     httpClient: URLSessionHTTPClient(session: .shared)
@@ -31,12 +30,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         window?.rootViewController = GridViewController(
             delegate: DemoGridDelegate(),
-            adapter: adapter!
+            viewModel: GridDemoViewModel(adapter: adapter),
+            screenTitle: "Demo Grid"
         )
         window?.makeKeyAndVisible()
-        
-        adapter?.set(items: DemoItemsProvider.items)
-        
+                
         return true
     }
 

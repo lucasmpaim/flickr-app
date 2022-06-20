@@ -8,16 +8,16 @@
 import Foundation
 import HttpClient
 
-protocol FlickrService {
+public protocol FlickrService {
     func fetchPopular(userID: String?) async -> Result<PhotoPage, Flickr.Error>
 }
 
-struct FlickrServiceImpl : FlickrService {
+public struct FlickrServiceImpl : FlickrService {
     
     private let client: HTTPClient
     private let photoMapper: PagedPhotoMapper
     
-    init(
+    public init(
         client: HTTPClient,
         photoMapper: PagedPhotoMapper
     ) {
@@ -25,7 +25,7 @@ struct FlickrServiceImpl : FlickrService {
         self.photoMapper = photoMapper
     }
     
-    func fetchPopular(userID: String? = nil) async -> Result<PhotoPage, Flickr.Error> {
+    public func fetchPopular(userID: String? = nil) async -> Result<PhotoPage, Flickr.Error> {
         guard let url = FlickrURLBuilder(method: .fetchPopularPhotos)
             .userId(userID)
             .build() else { return .failure(.invalidURI) }
@@ -44,7 +44,8 @@ struct FlickrServiceImpl : FlickrService {
         do {
             let result = try photoMapper.map(data)
             return .success(result)
-        } catch {
+        } catch let error {
+            debugPrint(error)
             return .failure(.cantDecode)
         }
     }

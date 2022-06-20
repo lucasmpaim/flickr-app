@@ -14,7 +14,7 @@ public struct Photo {
     public let title: String
     public let dateUpload: Date?
     public let ownerName: String
-
+    public let server: String
 }
 
 

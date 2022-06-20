@@ -21,6 +21,8 @@ public final class GridCell: UICollectionViewCell, Reusable {
     //MARK: - Properties
     var imageDownloaderTask: Task<Void, Error>?
     
+    private var gradientLayer: CAGradientLayer? = nil
+    
     public override func prepareForReuse() {
         super.prepareForReuse()
         imageDownloaderTask?.cancel()
@@ -46,6 +48,8 @@ public final class GridCell: UICollectionViewCell, Reusable {
         title.textColor = .white
         title.numberOfLines = .zero
         imageView.contentMode = .scaleAspectFill
+        imageView.adjustsImageWhenAncestorFocused = true
+
     }
     
     func setupConstraints() {
@@ -75,7 +79,10 @@ public final class GridCell: UICollectionViewCell, Reusable {
         \(viewModel.title)
         \(viewModel.owner) / \(viewModel.date ?? "")
         """
-        self.imageView.image = nil // TODO: - Add Placeholder
+        self.imageView.image = UIImage(
+            named: "placeholder", in: Bundle(for: GridCell.self), with: nil
+        )
+        
         self.imageDownloaderTask = Task<Void, Error> { [weak self] in
             guard let self = self else { throw GeneralError.selfDetached }
             let result = await downloadTaskProvider(viewModel.thumbnailImageURI).getResult()
@@ -100,18 +107,16 @@ public final class GridCell: UICollectionViewCell, Reusable {
         in context: UIFocusUpdateContext,
         with coordinator: UIFocusAnimationCoordinator
     ) {
-        
         coordinator.addCoordinatedAnimations({
-            self.imageView.adjustsImageWhenAncestorFocused = self.isFocused
             self.contentView.transform = self.isFocused ? .init(scaleX: 1.05, y: 1.05) : .identity
         })
-
     }
     
     func createGradientLayer() {
         let gradient = CAGradientLayer()
         gradient.frame = self.bounds
         gradient.colors = [UIColor.clear.cgColor, UIColor.black.cgColor]
+        gradientLayer = gradient
         self.imageView.layer.addSublayer(gradient)
     }
     

@@ -19,14 +19,11 @@ public final class GridAdapter<T> : GridAdaptable {
             reloadAction()
         }
     }
-    private let imageLoader: ImageLoader
     
     public init(
-        items: [T] = [],
-        imageLoader: ImageLoader
+        items: [T] = []
     ) {
         self.items = items
-        self.imageLoader = imageLoader
         self.reloadAction = {}
     }
     
@@ -46,7 +43,4 @@ public final class GridAdapter<T> : GridAdaptable {
         return items.count
     }
     
-    public func loadImage(url: URL) async throws -> Data {
-        try await imageLoader.load(from: url)
-    }
 }

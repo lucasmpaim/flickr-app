@@ -11,10 +11,15 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
-
+    var coordinator: FlickrSearchCoordinator?
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        coordinator = FlickrSearchCoordinator()
+        
+        window = UIWindow()
+        window?.rootViewController = coordinator!.rootViewController()
+        window?.makeKeyAndVisible()
+        
         return true
     }
 
