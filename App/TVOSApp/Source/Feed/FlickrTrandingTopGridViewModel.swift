@@ -82,7 +82,7 @@ final class FlickrTrandingTopGridViewModel: GridViewControllerViewModel {
     }
     
     func search(_ string: String) {
-        if string.isEmpty && currentMode != .popular {
+        if string.isEmpty {
             currentMode = .popular
             return
         }
