@@ -9,8 +9,16 @@ import Foundation
 
 final class FlickrURLBuilder {
     
-    enum SupportedMethods: String, RawRepresentable {
-        case fetchPopularPhotos = "flickr.photos.getPopular"
+    enum SupportedMethods {
+        case fetchPopularPhotos
+        case search(String)
+        
+        var name: String {
+            switch self {
+            case .fetchPopularPhotos: return "flickr.photos.getPopular"
+            case .search: return "flickr.photos.search"
+            }
+        }
     }
     
     private static var apiKey: String {
@@ -24,7 +32,9 @@ final class FlickrURLBuilder {
     private static var defaultUserNSId: String { "139356341@N05" }
     
     private let method: SupportedMethods
+    
     private var userNSID: String?
+    private var search: String?
     
     init(method: SupportedMethods) {
         self.method = method
@@ -36,9 +46,21 @@ final class FlickrURLBuilder {
     }
     
     func build() -> URL? {
-        let userIDString = (userNSID ?? FlickrURLBuilder.defaultUserNSId).addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? ""
-        let urlString = "\(FlickrURLBuilder.baseURL)&method=\(method.rawValue)&user_id=\(userIDString)"
+        let userIDString = encodeString(userNSID ?? FlickrURLBuilder.defaultUserNSId)
+        var urlString = "\(FlickrURLBuilder.baseURL)&method=\(method.name)&user_id=\(userIDString)"
+        
+        switch method {
+        case .fetchPopularPhotos: break
+        case .search(let search):
+            urlString.append(contentsOf: "&search=\(encodeString(search))")
+            break
+        }
+        
         return URL(string: urlString)
+    }
+    
+    fileprivate func encodeString(_ string: String) -> String {
+        string.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? ""
     }
     
 }
