@@ -19,18 +19,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         window = UIWindow()
-        let adapter = GridAdapter<GridCellViewModel>(
-            imageLoader: SmartImageLoader(
-                remoteLoader: .init(
-                    httpClient: URLSessionHTTPClient(session: .shared)
-                ),
-                cacheLoader: .init()
-            )
-        )
+        let adapter = GridAdapter<GridCellViewModel>()
         
         window?.rootViewController = GridViewController(
             delegate: DemoGridDelegate(),
-            viewModel: GridDemoViewModel(adapter: adapter),
+            viewModel: GridDemoViewModel(
+                adapter: adapter,
+                imageLoader: SmartImageLoader(
+                    remoteLoader: .init(
+                        httpClient: URLSessionHTTPClient(session: .shared)
+                    ),
+                    cacheLoader: .init()
+                )
+            ),
             screenTitle: "Demo Grid"
         )
         window?.makeKeyAndVisible()

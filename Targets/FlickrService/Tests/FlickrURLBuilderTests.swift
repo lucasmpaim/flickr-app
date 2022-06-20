@@ -29,7 +29,7 @@ final class FlickrURLBuilderTests: XCTestCase {
 
 fileprivate extension FlickrURLBuilderTests {
     func anyFlickrURL(userId: String = "139356341%40N05") -> String {
-        "https://www.flickr.com/services/rest/?api_key=6ee86dfd9bce6f402e171ff247753cbd&format=json&extras=owner_name,dateupload&method=flickr.photos.getPopular&user_id=\(userId)"
+        "https://www.flickr.com/services/rest/?api_key=6ee86dfd9bce6f402e171ff247753cbd&format=json&extras=owner_name,date_upload&nojsoncallback=1&method=flickr.photos.getPopular&user_id=\(userId)"
     }
 }
 
