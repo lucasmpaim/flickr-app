@@ -17,31 +17,19 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
     required init?(coder: NSCoder) {
         fatalError("Not implemented")
     }
-        
-    var adapter: VM.GridAdaptable { viewModel.adapter }
-        
-    public var viewModel: VM
-        
-    private lazy var collectionView: UICollectionView = {
-        let collection = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
-        collection.delegate = self
-        collection.dataSource = self
-        collection.register(GridCell.self)
-        collection.register(LoadingCell.self)
-        collection.register(GridHeader.self)
-        return collection
-    }()
     
-    private lazy var flowLayout: UICollectionViewFlowLayout = {
-        let flowLayout = UICollectionViewFlowLayout()
-        let width = (UIScreen.main.bounds.width / 3) - 180
-        let height = width * 0.8
-        flowLayout.itemSize = .init(width: width, height: height)
-        flowLayout.headerReferenceSize = CGSize(width: UIScreen.main.bounds.width, height: 80)
-        flowLayout.sectionInset = .init(top: 80, left: 0, bottom: 0, right: 0)
-        return flowLayout
-    }()
-
+    weak var gridViewDelegate: GridViewDelegate?
+    
+    var adapter: VM.GridAdaptable { viewModel.adapter }
+    
+    public var viewModel: VM
+    
+    public override func loadView() {
+        let view = GridView()
+        self.gridViewDelegate = view
+        self.view = view
+    }
+    
     public init(
         viewModel: VM
     ) {
@@ -50,7 +38,7 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
         super.init(nibName: nil, bundle: nil)
         
         self.adapter.reloadAction = { [weak self] in
-            self?.collectionView.reloadData()
+            self?.gridViewDelegate?.reloadData()
         }
         
         self.viewModel.observeState = { [weak self] state in
@@ -58,16 +46,15 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
         }
         
         self.viewModel.feedTitleObserver = { [weak self] _ in
-            self?.collectionView.reloadData()
+            self?.gridViewDelegate?.reloadData()
         }
         
-        setupViews()
-        setupConstraints()
     }
     
     public override func viewDidLoad() {
         super.viewDidLoad()
         viewModel.startFetchingData()
+        gridViewDelegate?.setGridContentProvider(self)
     }
     
     public func render(state: GridState) {
@@ -77,21 +64,6 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
         case .loading: break
         case .error: displayError()
         }
-    }
-    
-    func setupViews() {
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
-        self.view.addSubview(collectionView)
-    }
-    
-    func setupConstraints() {
-        let safeArea = view.safeAreaLayoutGuide
-        NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: safeArea.topAnchor),
-            collectionView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor),
-        ])
     }
     
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
