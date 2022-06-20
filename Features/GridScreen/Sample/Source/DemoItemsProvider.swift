@@ -37,8 +37,3 @@ final class DemoItemsProvider {
         return _items
     }()
 }
-
-
-final class DemoGridDelegate: GridDelegate {
-    func select(itemOn index: Int) { }
-}

@@ -11,6 +11,8 @@ import GridScreen
 import GridScreenUITVOS
 
 final class GridDemoViewModel: GridViewControllerViewModel {
+    var feedTitleObserver: ((String) -> Void)?
+    var feedTitle: String = "Demo"
     
     var observeState: ((GridState) -> Void)?
     
@@ -36,6 +38,9 @@ final class GridDemoViewModel: GridViewControllerViewModel {
     func loadImage(url: URL) async throws -> Data {
         try await imageLoader.load(from: url)
     }
+    
+    func nextPage() { }
+    func retry() { }
     
 }
 

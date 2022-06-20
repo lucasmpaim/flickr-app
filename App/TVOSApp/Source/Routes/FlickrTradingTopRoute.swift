@@ -24,7 +24,6 @@ final class FlickrTradingTopRoute {
         )
         
         let grid = GridViewController(
-            delegate: GridViewControllerDelegate(),
             viewModel: FlickrTrandingTopGridViewModel(
                 adapter: adapter,
                 fetchPagedGridUseCase: FetchPagedFlickrGridPhotosUseCase(service: service),
@@ -49,10 +48,3 @@ extension GridViewController: SearchUpdatable where VM == FlickrTrandingTopGridV
         viewModel.search(string)
     }
 }
-
-
-fileprivate final class GridViewControllerDelegate: GridDelegate {
-    func select(itemOn index: Int) { }
-}
-
-

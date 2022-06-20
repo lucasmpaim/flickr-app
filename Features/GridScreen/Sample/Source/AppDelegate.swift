@@ -22,7 +22,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let adapter = GridAdapter<GridCellViewModel>()
         
         window?.rootViewController = GridViewController(
-            delegate: DemoGridDelegate(),
             viewModel: GridDemoViewModel(
                 adapter: adapter,
                 imageLoader: SmartImageLoader(
@@ -31,8 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     ),
                     cacheLoader: .init()
                 )
-            ),
-            screenTitle: "Demo Grid"
+            )
         )
         window?.makeKeyAndVisible()
                 

@@ -11,20 +11,13 @@ public protocol GridRender {
     func render(state: GridState)
 }
 
-public protocol GridDelegate: AnyObject {
-    func select(itemOn index: Int)
-}
-
-
 public final class GridViewController<VM: GridViewControllerViewModel>:
     UIViewController, GridRender, UICollectionViewDataSource, UICollectionViewDelegate, UIScrollViewDelegate {
     
     required init?(coder: NSCoder) {
         fatalError("Not implemented")
     }
-    
-    public weak var delegate: GridDelegate?
-    
+        
     var adapter: VM.GridAdaptable { viewModel.adapter }
         
     public var viewModel: VM
@@ -50,10 +43,8 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
     }()
 
     public init(
-        delegate: GridDelegate,
         viewModel: VM
     ) {
-        self.delegate = delegate
         self.viewModel = viewModel
         
         super.init(nibName: nil, bundle: nil)
