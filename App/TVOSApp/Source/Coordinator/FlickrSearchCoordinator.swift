@@ -12,7 +12,9 @@ final class FlickrSearchCoordinator {
     
     func rootViewController() -> UIViewController {
         let tabController = UITabBarController()
-        let searchController = UISearchController()
+        let searchController = UISearchContainerViewController(
+            searchController: UISearchController()
+        )
         searchController.title = "Search"
         tabController.viewControllers = [
             FlickrTradingTopRoute.makeViewController(),
