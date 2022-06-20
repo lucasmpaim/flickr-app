@@ -34,16 +34,14 @@ final class FlickrSearchCoordinator: NSObject {
 extension FlickrSearchCoordinator: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         debouncer.handler = { [weak searchController] in
-            (((UIApplication.shared.delegate as? AppDelegate)?
-                .window?.rootViewController as? UITabBarController)?
-                .viewControllers?.first as? SearchUpdatable)?.setSearch(string: searchController?.searchBar.text ?? "")
+            guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
+                  let tabBar = appDelegate.window?.rootViewController as? UITabBarController,
+                  let updatable = tabBar.viewControllers?.first as? SearchUpdatable else {
+                return
+            }
+            updatable.setSearch(string: searchController?.searchBar.text ?? "")
         }
         debouncer.renewInterval()
     }
-}
-
-
-protocol SearchUpdatable {
-    func setSearch(string: String)
 }
 
