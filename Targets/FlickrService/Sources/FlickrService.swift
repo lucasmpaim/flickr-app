@@ -9,8 +9,8 @@ import Foundation
 import HttpClient
 
 public protocol FlickrService {
-    func fetchPopular(userID: String?) async -> Result<PhotoPage, Flickr.Error>
-    func search(userID: String?, search: String) async -> Result<PhotoPage, Flickr.Error>
+    func fetchPopular(userID: String?, page: UInt) async -> Result<PhotoPage, Flickr.Error>
+    func search(userID: String?, search: String, page: UInt) async -> Result<PhotoPage, Flickr.Error>
 }
 
 public struct FlickrServiceImpl : FlickrService {
@@ -26,9 +26,10 @@ public struct FlickrServiceImpl : FlickrService {
         self.photoMapper = photoMapper
     }
     
-    public func fetchPopular(userID: String? = nil) async -> Result<PhotoPage, Flickr.Error> {
+    public func fetchPopular(userID: String? = nil, page: UInt = 1) async -> Result<PhotoPage, Flickr.Error> {
         guard let url = FlickrURLBuilder(method: .fetchPopularPhotos)
             .userId(userID)
+            .page(page)
             .build() else { return .failure(.invalidURI) }
         
         let response = await client.getData(from: url)
@@ -41,10 +42,11 @@ public struct FlickrServiceImpl : FlickrService {
         }
     }
     
-    public func search(userID: String?, search string: String) async -> Result<PhotoPage, Flickr.Error> {
+    public func search(userID: String?, search string: String, page: UInt = 1) async -> Result<PhotoPage, Flickr.Error> {
         
         guard let url = FlickrURLBuilder(method: .search(string))
             .userId(userID)
+            .page(page)
             .build() else { return .failure(.invalidURI) }
         
         let response = await client.getData(from: url)

@@ -17,8 +17,14 @@ public protocol GridViewControllerViewModel {
     var observeState: ((GridState) -> Void)? { get set }
     var currentState: GridState { get }
     
+    var feedTitleObserver: ((String) -> Void)? { get set }
+    var feedTitle: String { get }
+
     var adapter: GridAdaptable { get }
     
     func startFetchingData()
+    
+    func nextPage()
+    func retry()
 }
 

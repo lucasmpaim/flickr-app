@@ -35,9 +35,15 @@ final class FlickrURLBuilder {
     
     private var userNSID: String?
     private var search: String?
+    private var page: UInt = 1
     
     init(method: SupportedMethods) {
         self.method = method
+    }
+    
+    func page(_ page: UInt) -> Self {
+        self.page = page
+        return self
     }
     
     func userId(_ id: String?) -> Self {
@@ -47,7 +53,7 @@ final class FlickrURLBuilder {
     
     func build() -> URL? {
         let userIDString = encodeString(userNSID ?? FlickrURLBuilder.defaultUserNSId)
-        var urlString = "\(FlickrURLBuilder.baseURL)&method=\(method.name)&user_id=\(userIDString)"
+        var urlString = "\(FlickrURLBuilder.baseURL)&method=\(method.name)&user_id=\(userIDString)&page=\(page)"
         
         switch method {
         case .fetchPopularPhotos: break

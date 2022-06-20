@@ -33,9 +33,11 @@ final class FlickrTradingTopRoute {
                         remoteLoader: .init(httpClient: URLSessionHTTPClient(session: .shared)),
                         cacheLoader: .init()
                     )
+                ),
+                searchPagedGridUseCase: FetchPagedSearchFlickrPhotosUseCase(
+                    service: service
                 )
-            ),
-            screenTitle: "Tranding Now On Fickr"
+            )
         )
         grid.title = "Feed"
         return grid

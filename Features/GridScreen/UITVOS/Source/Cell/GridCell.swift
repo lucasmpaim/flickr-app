@@ -47,6 +47,7 @@ public final class GridCell: UICollectionViewCell, Reusable {
         contentView.addSubview(title)
         title.textColor = .white
         title.numberOfLines = .zero
+        title.font = UIFont(descriptor: UIFontDescriptor.preferredFontDescriptor(withTextStyle: .body), size: 30)
         imageView.contentMode = .scaleAspectFill
         imageView.adjustsImageWhenAncestorFocused = true
 

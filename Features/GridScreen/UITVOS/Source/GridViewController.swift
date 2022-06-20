@@ -3,8 +3,8 @@ import Foundation
 import UIKit
 import GridScreen
 
-public enum GridState {
-    case empty(String), idle, loading, infiniteLoading
+public enum GridState: Equatable {
+    case empty, idle, loading, error
 }
 
 public protocol GridRender {
@@ -28,9 +28,7 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
     var adapter: VM.GridAdaptable { viewModel.adapter }
         
     private var viewModel: VM
-    
-    private let screenTitle: String
-    
+        
     private lazy var collectionView: UICollectionView = {
         let collection = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
         collection.delegate = self
@@ -53,12 +51,10 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
 
     public init(
         delegate: GridDelegate,
-        viewModel: VM,
-        screenTitle: String
+        viewModel: VM
     ) {
         self.delegate = delegate
         self.viewModel = viewModel
-        self.screenTitle = screenTitle
         
         super.init(nibName: nil, bundle: nil)
         
@@ -68,6 +64,10 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
         
         self.viewModel.observeState = { [weak self] state in
             self?.render(state: state)
+        }
+        
+        self.viewModel.feedTitleObserver = { [weak self] _ in
+            self?.collectionView.reloadData()
         }
         
         setupViews()
@@ -80,7 +80,12 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
     }
     
     public func render(state: GridState) {
-
+        switch state {
+        case .empty: break
+        case .idle: break
+        case .loading: break
+        case .error: displayError()
+        }
     }
     
     func setupViews() {
@@ -123,16 +128,27 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
     ) -> UICollectionReusableView {
         guard kind == UICollectionView.elementKindSectionHeader else { return .init() }
         let cell = collectionView.dequeue(GridHeader.self, for: indexPath)
-        switch viewModel.currentState {
-        case .empty(let customTitle): cell.title.text = customTitle
-        default: cell.title.text = screenTitle
-        }
+        cell.title.text = viewModel.feedTitle
         return cell
     }
     
 }
 
 
+extension GridViewController {
+    func displayError() {
+        let controller = UIAlertController(
+            title: "One problem as ocurred",
+            message: "Well... someone will take a look on it",
+            preferredStyle: .alert
+        )
+        controller.addAction(.init(title: "Retry", style: .default, handler: { [weak self, weak controller] _ in
+            controller?.dismiss(animated: true)
+            self?.viewModel.retry()
+        }))
+        present(controller, animated: true)
+    }
+}
 
 enum GeneralError : Error {
     case selfDetached
