@@ -20,9 +20,7 @@ public final class GridCell: UICollectionViewCell, Reusable {
     
     //MARK: - Properties
     var imageDownloaderTask: Task<Void, Error>?
-    
-    private var gradientLayer: CAGradientLayer? = nil
-    
+        
     public override func prepareForReuse() {
         super.prepareForReuse()
         imageDownloaderTask?.cancel()
@@ -36,7 +34,6 @@ public final class GridCell: UICollectionViewCell, Reusable {
         super.init(frame: frame)
         setupViews()
         setupConstraints()
-        additionalConfig()
     }
     
     func setupViews() {
@@ -65,10 +62,6 @@ public final class GridCell: UICollectionViewCell, Reusable {
             title.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             title.heightAnchor.constraint(equalTo: contentView.heightAnchor, multiplier: 0.5)
         ])
-    }
-    
-    func additionalConfig() {
-        createGradientLayer()
     }
     
     // MARK: - Populate
@@ -111,14 +104,6 @@ public final class GridCell: UICollectionViewCell, Reusable {
         coordinator.addCoordinatedAnimations({
             self.contentView.transform = self.isFocused ? .init(scaleX: 1.05, y: 1.05) : .identity
         })
-    }
-    
-    func createGradientLayer() {
-        let gradient = CAGradientLayer()
-        gradient.frame = self.bounds
-        gradient.colors = [UIColor.clear.cgColor, UIColor.black.cgColor]
-        gradientLayer = gradient
-        self.imageView.layer.addSublayer(gradient)
     }
     
 }

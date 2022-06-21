@@ -1,6 +1,7 @@
 
 import Foundation
 import UIKit
+import TVUIKit
 import GridScreen
 
 public enum GridState: Equatable {
@@ -12,7 +13,8 @@ public protocol GridRender {
 }
 
 public final class GridViewController<VM: GridViewControllerViewModel>:
-    UIViewController, GridRender, UICollectionViewDataSource, UICollectionViewDelegate, UIScrollViewDelegate {
+    UIViewController, GridRender, UICollectionViewDataSource, UICollectionViewDelegate,
+    UIScrollViewDelegate {
     
     required init?(coder: NSCoder) {
         fatalError("Not implemented")
@@ -134,7 +136,7 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
             viewModel.nextPage()
         }
     }
-    
+        
     //Save the currentFocusIndex to keep the focus btw full screen and flow
     private var currentFocusIndex: IndexPath?
     private var fullScreenStateChanging: Bool = false
