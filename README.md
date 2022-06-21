@@ -77,4 +77,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 ```
 
 
-Another thing that can be improved is split the libraries in Two different target's (<Lib>Interface and <Lib>) on Interface will just have protocols and another public stuff that any module can use without comprimise the decoupling. On the other module is the default implementation that can be replaced on future only changing the glue-layer (aka: AppDelegate).
+Another thing that can be improved is split the libraries in Two different target's (LibInterface and Lib) on Interface will just have protocols and another public stuff that any module can use without comprimise the decoupling. On the other module is the default implementation that can be replaced on future only changing the glue-layer (aka: AppDelegate).
+
+And Split UseCases in another module to re-use them in multiple target's
