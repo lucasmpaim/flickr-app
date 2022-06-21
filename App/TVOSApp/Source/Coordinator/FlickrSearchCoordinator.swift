@@ -7,6 +7,8 @@
 
 import Foundation
 import UIKit
+import HttpClient
+import ImageCacher
 import GridScreenUITVOS
 
 final class FlickrSearchCoordinator: NSObject {
@@ -29,6 +31,26 @@ final class FlickrSearchCoordinator: NSObject {
         return tabController
     }
     
+    func fullScreenImage(with url: URL) -> UIViewController {
+        let controller = FullScreenViewControllerRoute.makeViewController(imageURL: [url])
+        return controller
+    }
+    
+}
+
+final class FullScreenViewControllerRoute {
+    static func makeViewController(imageURL: [URL]) -> UIViewController {
+        let viewController = FullImageScreenViewController(
+            images: imageURL,
+            fetchImageUseCase: FetchImageUseCase(
+                imageLoader: SmartImageLoader(
+                    remoteLoader: .init(httpClient: URLSessionHTTPClient(session: .shared)),
+                    cacheLoader: .init()
+                )
+            )
+        )
+        return viewController
+    }
 }
 
 extension FlickrSearchCoordinator: UISearchResultsUpdating {

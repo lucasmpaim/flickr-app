@@ -9,6 +9,8 @@ import Foundation
 import GridScreen
 import GridScreenUITVOS
 import FlickrService
+import UIKit
+
 
 final class FlickrTrandingTopGridViewModel: GridViewControllerViewModel {
     
@@ -21,6 +23,9 @@ final class FlickrTrandingTopGridViewModel: GridViewControllerViewModel {
     
     // MARK: - Observables Properties
     var observeState: ((GridState) -> Void)?
+    
+    var observeRoute: ((UIViewController) -> Void)?
+    
     var currentState: GridState = .idle {
         didSet {
             observeState?(currentState)
@@ -116,6 +121,12 @@ final class FlickrTrandingTopGridViewModel: GridViewControllerViewModel {
         currentPage = 1
         hasNextPage = true
         adapter.set(items: [])
+    }
+    
+    func selectItemFromIndex(index: Int) {
+        observeRoute?(
+            (UIApplication.shared.delegate as! AppDelegate).coordinator!.fullScreenImage(with: adapter.itemFor(index: UInt(index)).thumbnailImageURI)
+        )
     }
 }
 

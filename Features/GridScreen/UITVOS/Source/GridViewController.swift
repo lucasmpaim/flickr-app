@@ -49,6 +49,10 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
             self?.gridViewDelegate?.reloadData()
         }
         
+        self.viewModel.observeRoute = { [weak self] in
+            self?.show($0, sender: nil)
+        }
+        
     }
     
     public override func viewDidLoad() {
@@ -95,6 +99,12 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
         return cell
     }
     
+    public func collectionView(
+        _ collectionView: UICollectionView,
+        didSelectItemAt indexPath: IndexPath
+    ) {
+        viewModel.selectItemFromIndex(index: indexPath.row)
+    }
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if scrollView.contentOffset.y >= scrollView.contentSize.height * 0.7 {

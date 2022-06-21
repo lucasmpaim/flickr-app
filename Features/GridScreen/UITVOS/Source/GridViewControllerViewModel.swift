@@ -7,6 +7,7 @@
 
 import Foundation
 import GridScreen
+import UIKit
 
 public protocol GridViewControllerViewModel {
     associatedtype GridAdaptable: GridScreen.GridAdaptable
@@ -22,9 +23,15 @@ public protocol GridViewControllerViewModel {
 
     var adapter: GridAdaptable { get }
     
+    func selectItemFromIndex(index: Int)
+    
     func startFetchingData()
     
     func nextPage()
     func retry()
+    
+    
+    var observeRoute: ((UIViewController) -> Void)? { get set }
+
 }
 
