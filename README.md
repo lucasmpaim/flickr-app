@@ -4,6 +4,9 @@
 
 Make an TVOS app with Swift/UIKit that the user can see an grid of popular photos from Flickr with infinite scrolling and search.
 
+## Important:
+
+The api_key from Flickr on this project are deleted, you need to generate a new own and put on [FlickrURLBuilder/apiKey](https://github.com/lucasmpaim/flickr-app/blob/main/Targets/FlickrService/Sources/FlickrURLBuilder.swift#L25)
 
 ## Useful commands:
 
