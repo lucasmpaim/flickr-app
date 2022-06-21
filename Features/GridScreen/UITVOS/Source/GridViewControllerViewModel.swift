@@ -31,7 +31,7 @@ public protocol GridViewControllerViewModel {
     func retry()
     
     
-    var observeRoute: ((UIViewController) -> Void)? { get set }
-
+    var observeFullScreen: ((Bool) -> Void)? { get set }
+    func exitPressed()
 }
 

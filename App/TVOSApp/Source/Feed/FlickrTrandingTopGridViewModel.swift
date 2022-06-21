@@ -24,7 +24,12 @@ final class FlickrTrandingTopGridViewModel: GridViewControllerViewModel {
     // MARK: - Observables Properties
     var observeState: ((GridState) -> Void)?
     
-    var observeRoute: ((UIViewController) -> Void)?
+    var observeFullScreen: ((Bool) -> Void)?
+    var fullScreen: Bool = false {
+        didSet {
+            observeFullScreen?(fullScreen)
+        }
+    }
     
     var currentState: GridState = .idle {
         didSet {
@@ -124,9 +129,10 @@ final class FlickrTrandingTopGridViewModel: GridViewControllerViewModel {
     }
     
     func selectItemFromIndex(index: Int) {
-        observeRoute?(
-            (UIApplication.shared.delegate as! AppDelegate).coordinator!.fullScreenImage(with: adapter.itemFor(index: UInt(index)).thumbnailImageURI)
-        )
+        fullScreen = true
+    }
+    func exitPressed() {
+        if fullScreen { fullScreen = false }
     }
 }
 

@@ -22,6 +22,13 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
     
     var adapter: VM.GridAdaptable { viewModel.adapter }
     
+    lazy var interceptMenuGesture: UITapGestureRecognizer = {
+        let menuPressRecognizer = UITapGestureRecognizer()
+        menuPressRecognizer.addTarget(self, action: #selector(menuPressed))
+        menuPressRecognizer.allowedPressTypes = [NSNumber(value: UIPress.PressType.menu.rawValue)]
+        return menuPressRecognizer
+    }()
+    
     public var viewModel: VM
     
     public override func loadView() {
@@ -49,10 +56,26 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
             self?.gridViewDelegate?.reloadData()
         }
         
-        self.viewModel.observeRoute = { [weak self] in
-            self?.show($0, sender: nil)
+        self.viewModel.observeFullScreen = { [weak self] in
+            guard let self = self else { return }
+            self.fullScreenStateChanging = true
+            $0 ? self.enterFullScreen() : self.exitFullScreen()
         }
         
+    }
+    
+    func enterFullScreen() {
+        self.gridViewDelegate?.currentMode = .fullScreen
+        self.view.addGestureRecognizer(interceptMenuGesture)
+    }
+    
+    func exitFullScreen() {
+        self.gridViewDelegate?.currentMode = .flow
+        self.view.removeGestureRecognizer(interceptMenuGesture)
+    }
+    
+    @objc func menuPressed() {
+        viewModel.exitPressed()
     }
     
     public override func viewDidLoad() {
@@ -111,6 +134,42 @@ public final class GridViewController<VM: GridViewControllerViewModel>:
             viewModel.nextPage()
         }
     }
+    
+    //Save the currentFocusIndex to keep the focus btw full screen and flow
+    private var currentFocusIndex: IndexPath?
+    private var fullScreenStateChanging: Bool = false
+    public func collectionView(
+        _ collectionView: UICollectionView,
+        didUpdateFocusIn context: UICollectionViewFocusUpdateContext,
+        with coordinator: UIFocusAnimationCoordinator
+    ) {
+        guard !fullScreenStateChanging else { return }
+        currentFocusIndex = context.nextFocusedIndexPath
+    }
+    
+    public func indexPathForPreferredFocusedView(in collectionView: UICollectionView) -> IndexPath? {
+        guard let currentFocusIndex = currentFocusIndex, fullScreenStateChanging else {
+            return nil
+        }
+        defer {
+            self.endFullScreenStateChanging()
+        }
+        collectionView.scrollToItem(
+            at: currentFocusIndex,
+            at: .left,
+            animated: true
+        )
+        return currentFocusIndex
+    }
+    
+    //TODO: - This need to be improved, found the correct way to manipulate focus on TVOS
+    public func endFullScreenStateChanging() {
+        Task {
+            try await Task.sleep(nanoseconds: UInt64(1e+08))
+            self.fullScreenStateChanging = false
+        }
+    }
+    
 }
 
 

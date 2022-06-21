@@ -7,15 +7,28 @@
 
 import Foundation
 import UIKit
+import TVUIKit
 
 protocol GridViewDelegate: AnyObject {
     func reloadData()
     func setGridContentProvider(
         _ provider: UICollectionViewDataSource & UICollectionViewDelegate
     )
+//    func focus(index: Int)
+    var currentMode: GridView.Mode { get set }
 }
 
 final class GridView: UIView, GridViewDelegate {
+    
+    enum Mode {
+        case flow, fullScreen
+    }
+    
+    var currentMode: Mode = .flow {
+        didSet {
+            updateMode()
+        }
+    }
     
     //MARK: - Views
     private lazy var collectionView: UICollectionView = {
@@ -35,6 +48,9 @@ final class GridView: UIView, GridViewDelegate {
         flowLayout.sectionInset = .init(top: 80, left: 0, bottom: 0, right: 0)
         return flowLayout
     }()
+    
+    private lazy var fullScreenLayout
+        = TVCollectionViewFullScreenLayout()
     
     required init?(coder: NSCoder) {
         fatalError("Not Implemented")
@@ -70,4 +86,15 @@ final class GridView: UIView, GridViewDelegate {
         collectionView.dataSource = provider
         collectionView.reloadData()
     }
+    
+    private func updateMode() {
+        switch currentMode {
+        case .flow:
+            collectionView.collectionViewLayout = flowLayout
+        case .fullScreen:
+            collectionView.collectionViewLayout = fullScreenLayout
+        }
+        self.collectionView.reloadData()
+    }
 }
+
