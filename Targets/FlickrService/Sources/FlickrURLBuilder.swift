@@ -21,7 +21,7 @@ final class FlickrURLBuilder {
         }
     }
     
-    private static var apiKey: String {
+    internal static var apiKey: String {
         "6ee86dfd9bce6f402e171ff247753cbd"
     }
     
