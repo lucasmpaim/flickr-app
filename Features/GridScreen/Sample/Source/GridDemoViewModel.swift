@@ -11,6 +11,16 @@ import GridScreen
 import GridScreenUITVOS
 
 final class GridDemoViewModel: GridViewControllerViewModel {
+    func selectItemFromIndex(index: Int) {
+        
+    }
+    
+    var observeFullScreen: ((Bool) -> Void)?
+    
+    func exitPressed() {
+        
+    }
+    
     var feedTitleObserver: ((String) -> Void)?
     var feedTitle: String = "Demo"
     
