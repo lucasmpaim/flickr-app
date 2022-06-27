@@ -2,7 +2,7 @@
 
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/PdcHfc2g3K0/0.jpg)](http://www.youtube.com/watch?v=PdcHfc2g3K0 "FlickrDemo")
 
-## Content:
+## Context:
 
 Make an TVOS app with Swift/UIKit that the user can see an grid of popular photos from Flickr with infinite scrolling and search.
 
